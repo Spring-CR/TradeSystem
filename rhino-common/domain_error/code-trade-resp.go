@@ -1,9 +1,0 @@
-package domain_error
-
-const (
-	// 5xxxxxx - 交易回报异常
-	TRADE_RESP_ERR_CODE                      = `500000`
-	TRADE_RESP_INSERT_TO_DB_ERR_CODE         = `500001`
-	TRADE_ACTION_LATEST_RESP_UPDATE_ERR_CODE = `500002`
-	TRADE_ORDER_LATEST_RESP_UPDATE_ERR_CODE  = `500003`
-)
