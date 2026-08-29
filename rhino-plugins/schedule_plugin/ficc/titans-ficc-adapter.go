@@ -20,7 +20,7 @@ func NewTitansFiccScheduleAdapter(applicationCfg *domain_cfg.ApplicationCfg) (ad
 	return
 }
 
-func (a *TitansFiccScheduleAdapter) ExecCustomizedPurgingTask(tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, purgingLog *schema.DataPurgingLog, positionManager *order_position_manager.PositionManager) (err error) {
+func (a *TitansFiccScheduleAdapter) ExecCustomizedPurgingTask(tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, purgingLog *schema.DataPurgingLog, positionManager *order_position_manager.PositionManager) (err error) {
 	log.Printf("ExecCustomizedPurgingTask...")
 	// 清理titans资金kafka
 	appCfgMap := a.applicationCfg.GetApplicationCfgItemMap()

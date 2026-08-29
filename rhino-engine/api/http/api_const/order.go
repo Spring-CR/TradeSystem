@@ -14,7 +14,6 @@ const (
 	SubForceArchiving               = "/force_archiving"              // 对当前的订单数据执行强制归档操作
 	SubForcePurging                 = "/force_purging"                // 对当前的订单数据执行强制清理操作
 	SubDump                         = "/dump"                         // 对当前的当日订单状态执行dump操作
-	SubRoutePositions               = "/positions"                    // 查看交易引擎持仓记录
-	SubRoutePositionAdj             = "/adjust"                       // 持仓调整
+	Positions                       = "/positions"                    // 查看交易引擎持仓记录
 	SubRouteUpdateOrderAttribute    = "/update_order_attribute"       // 更新订单属性
 )

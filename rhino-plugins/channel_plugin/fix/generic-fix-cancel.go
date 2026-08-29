@@ -117,7 +117,7 @@ func (c *GenericFIXChannel) OrderCancelRequest(actionUser string, actionTime int
 	de = c.doOrderCancelRequestByFIX(cancelAction, order)
 	if de != nil { // 如果发送FIX失败了，需要立即更新TradeActionLatestResp，设置取消被拒绝的状态和信息，拒绝理由可以直接取domain error的文本
 		cancelAction.OrdStatus = string(enum.OrdStatus_Rejected)
-		cancelAction.OrdRejReason = types.OrderCancelRejectPrefix + de.SimpleErrorStringForUser()
+		cancelAction.OrdRejReason = types.OrderCancelRejectPrefix + de.ErrorString()
 		cancelAction.CxlRejResponseTo = string(enum.CxlRejResponseTo_Cancel)
 		cancelAction.TransactTime = timeutil.ConvertTimeToMilliseconds(time.Now())
 		cancelAction.MsgTime = timeutil.ConvertTimeToMilliseconds(time.Now())

@@ -5,7 +5,7 @@ docker rm -vf data-titans-ficc; docker run --restart=always --name=data-titans-f
   -v /opt/rhino/titans-ficc/data/config/:/config/ \
   -e ServerPort=6093 \
   -p 6093:6093 \
-  dockertest.gf.com.cn/rhino/data-titans-ficc:b20251010-p1.0.3.3-latest
+  dockertest.gf.com.cn/rhino/data-titans-ficc:b20251010-p1.0.3.0-latest
 
 docker rm -vf data-titans-ficc; docker run --restart=always --name=data-titans-ficc -it -d \
   -v /opt/rhino/titans-ficc/data/log:/opt/log \

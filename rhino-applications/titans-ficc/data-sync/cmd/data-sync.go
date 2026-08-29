@@ -20,7 +20,6 @@ type Config struct {
 	DatabaseUrl         string
 	ServerPort          int
 	TableConfigs        []*dbutil.TableConfig
-	MrkBeginTime        string
 	MrkCloseTime        string
 	MrkCloseTimeZone    string
 	DataSyncAdapterPath string
@@ -81,7 +80,7 @@ func action(c *cli.Context) error {
 		panic(err)
 	}
 
-	dataSyncConfig := domain_cfg.NewDataSyncConfig(config.SystemCode, config.BusinessCode, config.CentralDatabaseUrl, config.DatabaseUrl, config.TableConfigs, config.MrkBeginTime, config.MrkCloseTime, config.MrkCloseTimeZone, config.DataSyncAdapterPath, config.TradeDateServiceUrl, config.TradeDateServiceAID, config.TradeDateServiceSec)
+	dataSyncConfig := domain_cfg.NewDataSyncConfig(config.SystemCode, config.BusinessCode, config.CentralDatabaseUrl, config.DatabaseUrl, config.TableConfigs, config.MrkCloseTime, config.MrkCloseTimeZone, config.DataSyncAdapterPath, config.TradeDateServiceUrl, config.TradeDateServiceAID, config.TradeDateServiceSec)
 
 	port := c.Int(OPT_SERVER_PORT)
 	if port <= 0 {

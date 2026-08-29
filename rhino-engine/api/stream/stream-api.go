@@ -27,7 +27,7 @@ type respReqMsgSeq struct {
 
 func NewStreamAPI(apiAdapter api_adapter.APIAdapter, client StreamClient) *StreamAPI {
 	inst := &StreamAPI{apiAdapter: apiAdapter, client: client, respReqMsgSeq: &respReqMsgSeq{}}
-	inst.onReset(nil, nil, nil, nil, nil, nil, nil)
+	inst.onReset()
 	return inst
 }
 
@@ -44,7 +44,7 @@ func NewStreamAPI1(apiAdapter api_adapter.APIAdapter, engine *order_domain.Order
 
 	inst.respReqMsgSeq = &respReqMsgSeq{}
 
-	inst.onReset(nil, nil, nil, nil, nil, nil, nil)
+	inst.onReset()
 
 	engine.GetOrderOrchestrator().GetOrderCache().SetAfterResetFunc(inst.onReset)
 
@@ -180,7 +180,7 @@ func (k *StreamAPI) getRespKey(tradeResp *types.TradeActionRespReturn) string {
 }
 
 // Todo: 测试造成的性能影响
-func (k *StreamAPI) onReset(tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, purgingLog *schema.DataPurgingLog) {
+func (k *StreamAPI) onReset() {
 	k.respKeys = map[string]bool{}
 	k.respReqMsgSeq.respReqMsgSeqs = map[int64]bool{}
 	k.respReqMsgSeq.minSeq = 0

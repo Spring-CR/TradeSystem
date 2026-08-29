@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS trade_orders (
 ,f_symbol_sfx                 VARCHAR(8)
 ,f_security_id                VARCHAR(64)
 ,f_id_source                  VARCHAR(2)
-,f_security_type              VARCHAR(16)
+,f_security_type              VARCHAR(2)
 ,f_side                       VARCHAR(2)
 ,f_transact_time              BIGINT
 ,f_trade_date                 BIGINT
@@ -2207,7 +2207,7 @@ CREATE TABLE IF NOT EXISTS group_trade_orders (
 ,f_system_code            VARCHAR(32)
 ,f_business_code          VARCHAR(32)
 ,f_cl_group_ord_id        VARCHAR(128)
-,f_security_type          VARCHAR(16)
+,f_security_type          VARCHAR(2)
 ,f_sub_order_derive_type  VARCHAR(2)
 ,f_transact_time          BIGINT
 ,f_ord_status             VARCHAR(2)
@@ -3045,7 +3045,7 @@ CREATE TABLE IF NOT EXISTS trade_action_latest_resps (
 ,f_symbol_sfx               VARCHAR(8)
 ,f_security_id              VARCHAR(64)
 ,f_id_source                VARCHAR(2)
-,f_security_type            VARCHAR(16)
+,f_security_type            VARCHAR(2)
 ,f_side                     VARCHAR(2)
 ,f_open_close               VARCHAR(2)
 ,f_order_qty                DOUBLE
@@ -4448,7 +4448,7 @@ CREATE TABLE IF NOT EXISTS trade_action_resps (
 ,f_symbol_sfx              VARCHAR(8)
 ,f_security_id             VARCHAR(64)
 ,f_id_source               VARCHAR(2)
-,f_security_type           VARCHAR(16)
+,f_security_type           VARCHAR(2)
 ,f_side                    VARCHAR(2)
 ,f_open_close              VARCHAR(2)
 ,f_order_qty               DOUBLE

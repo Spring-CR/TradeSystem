@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BASE_VERSION=20251010  # 基础版本
-PLUG_VERSION=1.0.0.5   # 插件版本
+PLUG_VERSION=1.0.0.2   # 插件版本
 IS_PROD=0              # 1 表示 true，即生产环境；0 表示 false，即测试环境
 
 COMPONENT=trade-engine-stars-fut

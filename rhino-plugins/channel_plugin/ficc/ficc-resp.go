@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"rhino-common/context/constant"
 	"rhino-common/domain_error"
 	"rhino-common/enum"
 	"rhino-common/utils/byteutils"
@@ -52,55 +51,6 @@ func (c *FiccChannel) getMessageType(msg []byte) string {
 	}
 
 	return ""
-}
-
-func (c *FiccChannel) getMessageType2(msg []byte) string {
-    const key = `"MsgType"`   // 固定匹配字符串，长度9
-    const keyLen = 9
-    n := len(msg)
-    if n < keyLen+4 {         // 最小有效长度: `"MsgType":"8"` 共13字节，但粗略过滤
-        return ""
-    }
-
-    // 遍历查找 `"MsgType"`
-    for i := 0; i <= n-keyLen; i++ {
-        // 逐字节精确匹配（编译器会优化为快速比较）
-        if msg[i] == '"' && msg[i+1] == 'M' && msg[i+2] == 's' &&
-            msg[i+3] == 'g' && msg[i+4] == 'T' && msg[i+5] == 'y' &&
-            msg[i+6] == 'p' && msg[i+7] == 'e' && msg[i+8] == '"' {
-
-            pos := i + keyLen // 跳过 `"MsgType"`
-
-            // 跳过冒号和可能存在的空格（处理 `": "` 或 `":"`）
-            for pos < n && (msg[pos] == ':' || msg[pos] == ' ') {
-                pos++
-            }
-            if pos >= n || msg[pos] != '"' {
-                return "" // 期望值的引号
-            }
-
-            // 提取值内容（起始引号之后）
-            start := pos + 1
-            end := start
-            for end < n && msg[end] != '"' {
-                end++
-            }
-            if end >= n || end-start != 1 { // 只允许单个字符的值
-                return ""
-            }
-
-            // 精确匹配 "8" 或 "9"
-            switch msg[start] {
-            case '8':
-                return "8"
-            case '9':
-                return "9"
-            default:
-                return ""
-            }
-        }
-    }
-    return ""
 }
 
 func (c *FiccChannel) processExecutionReport(data []byte, executionReport *ExecutionReport, msgSeq int64, msgTime time.Time) {
@@ -227,11 +177,6 @@ func (c *FiccChannel) processExecutionReport(data []byte, executionReport *Execu
 	}
 
 	jsonutil.PrintSimple("======> received tradeActionResp:\n", tradeActionResp)
-
-	if len(tradeActionResp.OrdRejReason) > constant.MaxRejectMsgLen {
-		tradeActionResp.OrdRejReason = tradeActionResp.OrdRejReason[:constant.MaxRejectMsgLen]
-	}
-	
 	c.tradeActionRespBuf <- tradeActionResp
 }
 
@@ -273,10 +218,6 @@ func (c *FiccChannel) processOrderCancelReject(data []byte, orderCancelReject *O
 	// 对成交回报进行清洗
 	c.CleanTradeActionResp(tradeActionResp)
 
-	if len(tradeActionResp.OrdRejReason) > constant.MaxRejectMsgLen {
-		tradeActionResp.OrdRejReason = tradeActionResp.OrdRejReason[:constant.MaxRejectMsgLen]
-	}
-
 	c.tradeActionRespBuf <- tradeActionResp
 }
 
@@ -290,10 +231,6 @@ func (c *FiccChannel) startProcessExecutionReportFromBuf() {
 
 					// 设置插入时间
 					tradeActionResp.DBInsertTime = timeutil.ConvertTimeToMilliseconds(time.Now())
-
-					if len(tradeActionResp.OrdRejReason) > 512 {
-						tradeActionResp.OrdRejReason = tradeActionResp.OrdRejReason[:512]
-					}
 
 					err := app_store.InsertTradeActionResp(tx, tradeActionResp)
 					if err != nil && !dbutil.IsMysqlDuplicateEntryError(err) { // 排除重复插入的错误

@@ -207,9 +207,6 @@ func (c *FiccChannel) NewOrderSingle(order *schema.TradeOrder, afterTradeOrderUp
 
 func (c *FiccChannel) onDataReceived(data []byte, msgSeq int64, msgTime time.Time) {
 	msgType := c.getMessageType(data)
-	if msgType == "" {
-		msgType = c.getMessageType2(data)
-	}
 
 	log.Printf("======> onDataReceived:%s, msgType=%v\n", data, msgType)
 	if c.stopReceivingResp {

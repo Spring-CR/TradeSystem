@@ -184,13 +184,9 @@ func (c *OrderCache) updateOrderStatusByTradeActionResp(syncSendMap map[string]b
 	orderOrResps := c.sortOrderAndResps(directOrderMap, tradeActionResps)
 	for _, orderOrResp := range orderOrResps {
 		if orderOrResp.tradeOrder != nil {
-			log.Printf("start initPositionForNewOrder for %s\n", orderOrResp.tradeOrder.AppOrdID)
 			c.initPositionForNewOrder(orderOrResp.tradeOrder)
-			log.Printf("finish initPositionForNewOrder for %s\n", orderOrResp.tradeOrder.AppOrdID)
 		} else {
-			log.Printf("start processTradeActionResp for %s\n", orderOrResp.tradeActionResp.ExecID)
 			processTradeActionResp(orderOrResp.tradeActionResp)
-			log.Printf("finish processTradeActionResp for %s\n", orderOrResp.tradeActionResp.ExecID)
 		}
 	}
 

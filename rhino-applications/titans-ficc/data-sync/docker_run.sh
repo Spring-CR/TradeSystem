@@ -5,7 +5,7 @@ docker rm -vf data-sync-titans-ficc; docker run --restart=always --name=data-syn
   -v /opt/rhino/titans-ficc/data-sync/config/:/config/ \
   -e ServerPort=7093 \
   -p 7093:7093 \
-  dockertest.gf.com.cn/rhino/data-sync-titans-ficc:b20251010-p1.0.6.9-latest
+  dockertest.gf.com.cn/rhino/data-sync-titans-ficc:b20251010-p1.0.6.6-latest
 
 
 docker rm -vf data-sync-titans-ficc; docker run --restart=always --name=data-sync-titans-ficc -it -d \

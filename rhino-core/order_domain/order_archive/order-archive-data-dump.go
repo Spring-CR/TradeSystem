@@ -29,27 +29,27 @@ func (a *OrderArchiver) dumpDataToDailyTables(
 		log.Printf("===> tradeActionLatestResp, appOrdID:%s, clOrdID:%s, actionType:%v\n", tradeActionLatestResp.AppOrdID, tradeActionLatestResp.ClOrdID, tradeActionLatestResp.ActionType)
 	}
 
-	de = a.dumpTradeOrders(a.applicationCfg.GetCentralDB(), dailyTradeOrderTableName, tradeOrders, nil)
+	de = a.dumpTradeOrders(a.applicationCfg.GetCentralDB(), dailyTradeOrderTableName, tradeOrders)
 	if de != nil {
 		return
 	}
 
-	de = a.dumpTradeActionLatestResps(a.applicationCfg.GetCentralDB(), dailyTradeActionLatestRespTableName, tradeActionLatestResps, nil)
+	de = a.dumpTradeActionLatestResps(a.applicationCfg.GetCentralDB(), dailyTradeActionLatestRespTableName, tradeActionLatestResps)
 	if de != nil {
 		return
 	}
 
-	de = a.dumpTradeActionResps(a.applicationCfg.GetCentralDB(), dailyTradeActionRespTableName, tradeActionResps, nil)
+	de = a.dumpTradeActionResps(a.applicationCfg.GetCentralDB(), dailyTradeActionRespTableName, tradeActionResps)
 	if de != nil {
 		return
 	}
 
-	de = a.dumpExtendTradeOrders(extendDailyTradeOrderTableName, tradeOrders, nil)
+	de = a.dumpExtendTradeOrders(extendDailyTradeOrderTableName, tradeOrders)
 	if de != nil {
 		return
 	}
 
-	de = a.dumpExtendTradeActionResps(orderMap, extendDailyTradeActionRespTableName, tradeActionResps, nil)
+	de = a.dumpExtendTradeActionResps(orderMap, extendDailyTradeActionRespTableName, tradeActionResps)
 
 	return
 }
@@ -63,27 +63,27 @@ func (a *OrderArchiver) dumpDataToHistoricalTables(
 	extendHistoricalTradeActionRespTableName string,
 	archivingLog *schema.DataArchivingLog, orderMap map[string]*types.TraceableTradeOrder, tradeOrders []*schema.TradeOrder, tradeActionLatestResps []*schema.TradeActionLatestResp, tradeActionResps []*schema.TradeActionResp) (de *domain_error.Error) {
 
-	de = a.dumpTradeOrders(a.applicationCfg.GetCentralDB(), historicalTradeOrderTableName, tradeOrders, archivingLog)
+	de = a.dumpTradeOrders(a.applicationCfg.GetCentralDB(), historicalTradeOrderTableName, tradeOrders, archivingLog.ArchivingDate)
 	if de != nil {
 		return
 	}
 
-	de = a.dumpTradeActionLatestResps(a.applicationCfg.GetCentralDB(), historicalTradeActionLatestRespTableName, tradeActionLatestResps, archivingLog)
+	de = a.dumpTradeActionLatestResps(a.applicationCfg.GetCentralDB(), historicalTradeActionLatestRespTableName, tradeActionLatestResps, archivingLog.ArchivingDate)
 	if de != nil {
 		return
 	}
 
-	de = a.dumpTradeActionResps(a.applicationCfg.GetCentralDB(), historicalTradeActionRespTableName, tradeActionResps, archivingLog)
+	de = a.dumpTradeActionResps(a.applicationCfg.GetCentralDB(), historicalTradeActionRespTableName, tradeActionResps, archivingLog.ArchivingDate)
 	if de != nil {
 		return
 	}
 
-	de = a.dumpExtendTradeOrders(extendHistoricalTradeOrderTableName, tradeOrders, archivingLog)
+	de = a.dumpExtendTradeOrders(extendHistoricalTradeOrderTableName, tradeOrders, archivingLog.ArchivingDate)
 	if de != nil {
 		return
 	}
 
-	de = a.dumpExtendTradeActionResps(orderMap, extendHistoricalTradeActionRespTableName, tradeActionResps, archivingLog)
+	de = a.dumpExtendTradeActionResps(orderMap, extendHistoricalTradeActionRespTableName, tradeActionResps, archivingLog.ArchivingDate)
 
 	return
 }
@@ -124,7 +124,7 @@ func (a *OrderArchiver) ExtractSchemaData(ordersToArchive []*types.TraceableTrad
 
 var batchSize = 100000
 
-func (a *OrderArchiver) dumpTradeOrders(db *sql.DB, tableName string, records []*schema.TradeOrder, archivingLog *schema.DataArchivingLog) (de *domain_error.Error) {
+func (a *OrderArchiver) dumpTradeOrders(db *sql.DB, tableName string, records []*schema.TradeOrder, archivingDate ...string) (de *domain_error.Error) {
 	n := len(records)
 	if n == 0 {
 		return
@@ -140,7 +140,7 @@ func (a *OrderArchiver) dumpTradeOrders(db *sql.DB, tableName string, records []
 		}
 		subRecords := records[idxPair[0]:idxPair[1]]
 		for _, record := range subRecords {
-			err := app_store.ArchiveInsertTradeOrder(tx, insertRecordStmt, record, archivingLog)
+			err := app_store.ArchiveInsertTradeOrder(tx, insertRecordStmt, record, archivingDate...)
 			if dbutil.IsMysqlDuplicateEntryError(err) {
 				err = nil
 			}
@@ -159,7 +159,7 @@ func (a *OrderArchiver) dumpTradeOrders(db *sql.DB, tableName string, records []
 	return
 }
 
-func (a *OrderArchiver) dumpTradeActionLatestResps(db *sql.DB, tableName string, records []*schema.TradeActionLatestResp, archivingLog *schema.DataArchivingLog) (de *domain_error.Error) {
+func (a *OrderArchiver) dumpTradeActionLatestResps(db *sql.DB, tableName string, records []*schema.TradeActionLatestResp, archivingDate ...string) (de *domain_error.Error) {
 	n := len(records)
 	if n == 0 {
 		return
@@ -175,7 +175,7 @@ func (a *OrderArchiver) dumpTradeActionLatestResps(db *sql.DB, tableName string,
 		}
 		subRecords := records[idxPair[0]:idxPair[1]]
 		for _, record := range subRecords {
-			err := app_store.ArchiveInsertTradeActionLatestResp(tx, insertRecordStmt, record, archivingLog)
+			err := app_store.ArchiveInsertTradeActionLatestResp(tx, insertRecordStmt, record, archivingDate...)
 			if dbutil.IsMysqlDuplicateEntryError(err) {
 				err = nil
 			}
@@ -194,7 +194,7 @@ func (a *OrderArchiver) dumpTradeActionLatestResps(db *sql.DB, tableName string,
 	return
 }
 
-func (a *OrderArchiver) dumpTradeActionResps(db *sql.DB, tableName string, records []*schema.TradeActionResp, archivingLog *schema.DataArchivingLog) (de *domain_error.Error) {
+func (a *OrderArchiver) dumpTradeActionResps(db *sql.DB, tableName string, records []*schema.TradeActionResp, archivingDate ...string) (de *domain_error.Error) {
 	n := len(records)
 	if n == 0 {
 		return
@@ -210,7 +210,7 @@ func (a *OrderArchiver) dumpTradeActionResps(db *sql.DB, tableName string, recor
 		}
 		subRecords := records[idxPair[0]:idxPair[1]]
 		for _, record := range subRecords {
-			err := app_store.ArchiveInsertTradeActionResp(tx, insertRecordStmt, record, archivingLog)
+			err := app_store.ArchiveInsertTradeActionResp(tx, insertRecordStmt, record, archivingDate...)
 			if dbutil.IsMysqlDuplicateEntryError(err) {
 				err = nil
 			}
@@ -229,7 +229,7 @@ func (a *OrderArchiver) dumpTradeActionResps(db *sql.DB, tableName string, recor
 	return
 }
 
-func (a *OrderArchiver) dumpExtendTradeOrders(tableName string, records []*schema.TradeOrder, archivingLog *schema.DataArchivingLog) (de *domain_error.Error) {
+func (a *OrderArchiver) dumpExtendTradeOrders(tableName string, records []*schema.TradeOrder, archivingDate ...string) (de *domain_error.Error) {
 	n := len(records)
 	if n == 0 {
 		return
@@ -237,7 +237,7 @@ func (a *OrderArchiver) dumpExtendTradeOrders(tableName string, records []*schem
 	log.Printf("===> dump %d extend trade order records to table %s\n", n, tableName)
 	idxPairs := splitArray(n, batchSize)
 	insertRecordStmt := fmt.Sprintf(a._insertDataToExtendTradeOrderTableWithoutIDSql, tableName)
-	insertRecordStmt = app_store.GetArchiveInsertRecordStmt(insertRecordStmt, archivingLog)
+	insertRecordStmt = app_store.GetArchiveInsertRecordStmt(insertRecordStmt, archivingDate...)
 	for _, idxPair := range idxPairs {
 		tx, de := dbutil.BeginTx(a.applicationCfg.GetCentralDB())
 		if de != nil {
@@ -245,7 +245,7 @@ func (a *OrderArchiver) dumpExtendTradeOrders(tableName string, records []*schem
 		}
 		subRecords := records[idxPair[0]:idxPair[1]]
 		for _, record := range subRecords {
-			args, err := a.getInsertExtendTradeOrderArgs(record, false, "", archivingLog)
+			args, err := a.getInsertExtendTradeOrderArgs(record, false, "", archivingDate...)
 			if err != nil {
 				dbutil.RollbackTx(tx)
 				return domain_error.Build(domain_error.GENERIC_ERR_CODE, err)
@@ -269,7 +269,7 @@ func (a *OrderArchiver) dumpExtendTradeOrders(tableName string, records []*schem
 	return
 }
 
-func (a *OrderArchiver) dumpExtendTradeActionResps(orderMap map[string]*types.TraceableTradeOrder, tableName string, records []*schema.TradeActionResp, archivingLog *schema.DataArchivingLog) (de *domain_error.Error) {
+func (a *OrderArchiver) dumpExtendTradeActionResps(orderMap map[string]*types.TraceableTradeOrder, tableName string, records []*schema.TradeActionResp, archivingDate ...string) (de *domain_error.Error) {
 	n := len(records)
 	if n == 0 {
 		return
@@ -277,7 +277,7 @@ func (a *OrderArchiver) dumpExtendTradeActionResps(orderMap map[string]*types.Tr
 	log.Printf("===> dump %d extend trade action resp records to table %s\n", n, tableName)
 	idxPairs := splitArray(n, batchSize)
 	insertRecordStmt := fmt.Sprintf(a._insertDataToExtendTradeActionRespTableWithoutIDSql, tableName)
-	insertRecordStmt = app_store.GetArchiveInsertRecordStmt(insertRecordStmt, archivingLog)
+	insertRecordStmt = app_store.GetArchiveInsertRecordStmt(insertRecordStmt, archivingDate...)
 	for _, idxPair := range idxPairs {
 		tx, de := dbutil.BeginTx(a.applicationCfg.GetCentralDB())
 		if de != nil {
@@ -290,6 +290,7 @@ func (a *OrderArchiver) dumpExtendTradeActionResps(orderMap map[string]*types.Tr
 			if !ok {
 				continue
 			}
+
 
 			// 复制一个订单
 			tradeOrder := &schema.TradeOrder{}
@@ -308,7 +309,7 @@ func (a *OrderArchiver) dumpExtendTradeActionResps(orderMap map[string]*types.Tr
 			tradeOrder.AvgPx = record.AvgPx
 			tradeOrder.OrdRejReason = record.OrdRejReason
 
-			args, err := a.getInsertExtendTradeActionRespArgs(tradeOrder, record, false, archivingLog)
+			args, err := a.getInsertExtendTradeActionRespArgs(tradeOrder, record, false, archivingDate...)
 			if err != nil {
 				dbutil.RollbackTx(tx)
 				return domain_error.Build(domain_error.GENERIC_ERR_CODE, err)

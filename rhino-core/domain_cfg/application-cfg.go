@@ -18,7 +18,6 @@ import (
 
 type ApplicationCfg struct {
 	application              *schema.Application
-	appArchivingCfgItems     []*schema.ApplicationArchivingCfgItem
 	appCfgItems              []*schema.ApplicationCfgItem
 	extendAttrItems          []*schema.ExtendAttrItem
 	positionAttrItems        []*schema.PositionAttrItem
@@ -32,8 +31,8 @@ type ApplicationCfg struct {
 	dataSyncEventChan        chan *datamap.DataChangeEvent
 }
 
-func NewApplicationCfg(application *schema.Application, appArchivingCfgItems []*schema.ApplicationArchivingCfgItem, appCfgItems []*schema.ApplicationCfgItem, extendAttrItems []*schema.ExtendAttrItem, positionAttrItems []*schema.PositionAttrItem, tradeActionRespAttrItems []*schema.TradeActionRespAttrItem, tradeChannels []*TradeChannelDetails) (cfg *ApplicationCfg, de *domain_error.Error) {
-	cfg = &ApplicationCfg{application: application, appArchivingCfgItems: appArchivingCfgItems, appCfgItems: appCfgItems, extendAttrItems: extendAttrItems, positionAttrItems: positionAttrItems, tradeActionRespAttrItems: tradeActionRespAttrItems, tradeChannels: tradeChannels}
+func NewApplicationCfg(application *schema.Application, appCfgItems []*schema.ApplicationCfgItem, extendAttrItems []*schema.ExtendAttrItem, positionAttrItems []*schema.PositionAttrItem, tradeActionRespAttrItems []*schema.TradeActionRespAttrItem, tradeChannels []*TradeChannelDetails) (cfg *ApplicationCfg, de *domain_error.Error) {
+	cfg = &ApplicationCfg{application: application, appCfgItems: appCfgItems, extendAttrItems: extendAttrItems, positionAttrItems: positionAttrItems, tradeActionRespAttrItems: tradeActionRespAttrItems, tradeChannels: tradeChannels}
 
 	// ---------------------- 设置租户数据库 ----------------------
 	db, err := sql.Open("mysql", application.DatabaseUrl)
@@ -207,29 +206,17 @@ func (c *ApplicationCfg) GetTradeActionRespAttrItems() []*schema.TradeActionResp
 }
 
 // 获取可以执行归档的开始时间和最晚可执行归档的时间
-func (c *ApplicationCfg) GetTimeRangeForDataArchiving(dataArchiveCnBeginTime, dataArchiveCnLatestTime string, isDSTSensitive *bool) (beginTimeSecond, endTimeSencond int, err error) {
-
-	if dataArchiveCnBeginTime == "" {
-		dataArchiveCnBeginTime = c.application.DataArchiveCnBeginTime
+func (c *ApplicationCfg) GetTimeRangeForDataArchiving() (beginTimeSecond, endTimeSencond int, err error) {
+	beginTimeSecond, err = timeutil.GetCumulativeSecondsFromSimpleTimeString(c.application.DataArchiveCnBeginTime)
+	if err != nil {
+		return
 	}
-	beginTimeSecond, err = timeutil.GetCumulativeSecondsFromSimpleTimeString(dataArchiveCnBeginTime)
+	endTimeSencond, err = timeutil.GetCumulativeSecondsFromSimpleTimeString(c.application.DataArchiveCnLatestTime)
 	if err != nil {
 		return
 	}
 
-	if dataArchiveCnLatestTime == "" {
-		dataArchiveCnLatestTime = c.application.DataArchiveCnLatestTime
-	}
-	endTimeSencond, err = timeutil.GetCumulativeSecondsFromSimpleTimeString(dataArchiveCnLatestTime)
-	if err != nil {
-		return
-	}
-
-	dstSensitive := c.application.IsDSTSensitive
-	if isDSTSensitive != nil {
-		dstSensitive = *isDSTSensitive
-	}
-	if dstSensitive {
+	if c.application.IsDSTSensitive {
 
 		isDst := timeutil.IsDST()
 
@@ -250,10 +237,6 @@ func (c *ApplicationCfg) GetApiToken() string {
 	return c.application.ApiToken
 }
 
-func (c*ApplicationCfg) GetApplicationArchivingCfgItems() []*schema.ApplicationArchivingCfgItem {
-	return c.appArchivingCfgItems
-}
-
 func (c *ApplicationCfg) GetApplicationCfgItems() []*schema.ApplicationCfgItem {
 	return c.appCfgItems
 }
@@ -272,7 +255,6 @@ func (c *ApplicationCfg) initAutoSyncRepo() {
 	}
 	data, err := os.ReadFile(c.application.DataRepoConfigPath)
 	if err != nil {
-		log.Printf("data.DataRepoConfigPath1 = %s\n", data)
 		domain_error.ProcessSevereError(true, 5, nil, err, "fail to initAutoSyncRepo")
 	}
 	log.Printf("table s config data: %s\n", data)
@@ -280,7 +262,6 @@ func (c *ApplicationCfg) initAutoSyncRepo() {
 	config := &datamap.DataMapConfig{}
 	err = json.Unmarshal(data, config)
 	if err != nil {
-		log.Printf("data.DataRepoConfigPath2 = %s\n", data)
 		domain_error.ProcessSevereError(true, 5, nil, err, "fail to initAutoSyncRepo")
 	}
 

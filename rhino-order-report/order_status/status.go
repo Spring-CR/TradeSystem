@@ -35,7 +35,6 @@ type OrderStatusReplica struct {
 	dbWrite                 *sql.DB
 	dbRead                  *sql.DB
 	memPosition             *position.MemPosition
-	positionManager         *order_position_manager.PositionManager
 }
 
 func NewOrderStatusReplica(applicationCfg *domain_cfg.ApplicationCfg) *OrderStatusReplica {
@@ -63,10 +62,9 @@ func NewOrderStatusReplica(applicationCfg *domain_cfg.ApplicationCfg) *OrderStat
 		}
 		// 增加持仓计算器的订单执行回报channel
 		tradeRespChs = append(tradeRespChs, positionManager.GetTradeRespCh())
-		inst.positionManager = positionManager
 	}
 
-	inst.orderCache = order_cache.NewOrderCache(false, applicationCfg, positionManager, tradeRespChs, inst.afterAddRootTradeOrder, inst.afterUpdateByTradeActionResp, inst.afterAddTradeActionForDirectOrder, inst.afterUpdateTradeOrderDraft, inst.afterDeleteTradeOrderDraft, inst.afterUpdateTradeOrderAttributes, inst.afterReset, inst.afterSyncOrder, inst.afterSyncTradeActionLatestResp, inst.adjustPosition)
+	inst.orderCache = order_cache.NewOrderCache(false, applicationCfg, positionManager, tradeRespChs, inst.afterAddRootTradeOrder, inst.afterUpdateByTradeActionResp, inst.afterAddTradeActionForDirectOrder, inst.afterUpdateTradeOrderDraft, inst.afterDeleteTradeOrderDraft, inst.afterUpdateTradeOrderAttributes, inst.afterReset, inst.afterSyncOrder, inst.afterSyncTradeActionLatestResp)
 
 	// 原来注释的理由：只有reset的时候才需要调用。orderCache创建时，已经自动恢复数据
 	// 解除注释的理由：orderCache创建时，自动恢复数据模型数据，要更新至sqllite，需要syncMsg驱动。但在stricRecover过程中，如果db的数据本身是完整的，则处理syncMsg消息时，将过滤掉重复的数据，导致sqlite数据无法恢复。
@@ -206,8 +204,4 @@ func (s *OrderStatusReplica) GetOrderCache() *order_cache.OrderCache {
 
 func (s *OrderStatusReplica) GetMemPosition() *position.MemPosition {
 	return s.memPosition
-}
-
-func (s *OrderStatusReplica) adjustPosition(mockTradeOrder *schema.TradeOrder, mockTradeActionResp *schema.TradeActionResp) {
-	s.positionManager.AdjustPosition(mockTradeOrder, mockTradeActionResp)
 }

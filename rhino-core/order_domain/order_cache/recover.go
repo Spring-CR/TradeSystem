@@ -14,9 +14,9 @@ func (c *OrderCache) recoverFromSyncMessages(syncMsgs []*OrderCacheSyncMessage) 
 		//jsData, _ := json.MarshalIndent(syncMsg, "", "  ")
 		//log.Printf("===> syncMsg:%s\n", jsData)
 		log.Printf("===> syncMsg#%d: msgType:%v\n", i, syncMsg.MessageType)
-		if syncMsg.MessageType == OrderCacheSyncMessageType_UpdateTradeOrderAttributes || syncMsg.MessageType == OrderCacheSyncMessageType_AdjustPosition {
+		if syncMsg.MessageType == OrderCacheSyncMessageType_UpdateTradeOrderAttributes {
 			jsData, _ := json.Marshal(syncMsg)
-			log.Printf("skip syncMsg:%s\n", jsData)
+			log.Printf("skip UpdateTradeOrderAttributes syncMsg:%s\n", jsData)
 			continue
 		}
 		c.updateByOrderCacheSyncMessage(syncMsg)
@@ -40,12 +40,10 @@ func (c *OrderCache) updateByOrderCacheSyncMessage(syncMsg *OrderCacheSyncMessag
 	case OrderCacheSyncMessageType_UpdateTradeOrderAttributes:
 		c.UpdateTradeOrderAttributes(syncMsg.AppOrdID, syncMsg.UpdateAttributes)
 	case OrderCacheSyncMessageType_Reset:
-		c.reset(syncMsg.AppOrdIDMap, syncMsg.ClOrdIDMap, syncMsg.ComposeOrdIDMap, syncMsg.ActionKeyMap, syncMsg.TradeOrdersToKeep, syncMsg.TradeActionLatestRespsToKeep, syncMsg.TradeActionRespsToKeep, syncMsg.TradeOrdersToArchive, syncMsg.TradeActionLatestRespsToArchive, syncMsg.TradeActionRespsToArchive, syncMsg.PurgingLog)
+		c.reset()
 	case OrderCacheSyncMessageType_SyncOrder:
 		c.SyncOrder(syncMsg.TradeOrder)
 	case OrderCacheSyncMessageType_SyncTradeActionLatestResp:
 		c.SyncTradeActionLatestResp(syncMsg.TradeActionLatestResp)
-	case OrderCacheSyncMessageType_AdjustPosition:
-		c.AfterAdjustPosition(syncMsg.TradeOrder, syncMsg.TradeActionResp)
 	}
 }

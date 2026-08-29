@@ -7,13 +7,13 @@ import (
 )
 
 func (a *OrderArchiver) DumpTradeOrders(db *sql.DB, tableName string, records []*schema.TradeOrder) (de *domain_error.Error) {
-	return a.dumpTradeOrders(db, tableName, records, nil)
+	return a.dumpTradeOrders(db, tableName, records)
 }
 
 func (a *OrderArchiver) DumpTradeActionLatestResps(db *sql.DB, tableName string, records []*schema.TradeActionLatestResp) (de *domain_error.Error) {
-	return a.dumpTradeActionLatestResps(db, tableName, records, nil)
+	return a.dumpTradeActionLatestResps(db, tableName, records)
 }
 
 func (a *OrderArchiver) DumpTradeActionResps(db *sql.DB, tableName string, records []*schema.TradeActionResp) (de *domain_error.Error) {
-	return a.dumpTradeActionResps(db, tableName, records, nil)
+	return a.dumpTradeActionResps(db, tableName, records)
 }

@@ -13,7 +13,6 @@ import (
 	"rhino-core/domain_cfg"
 	"rhino-core/order_domain/order_position_manager"
 	"rhino-core/schema"
-	"rhino-data/datamap"
 	"strconv"
 )
 
@@ -468,45 +467,5 @@ func (a *TitansFiccOrderPositionAdapter) GeneralizePositionRecord(metadata inter
 		}
 	}
 
-	return
-}
-
-func (a *TitansFiccOrderPositionAdapter) GetQuotaNotEnoughHandler() func(tradeOrder *schema.TradeOrder, de *domain_error.Error) {
-	return nil
-}
-
-func (a *TitansFiccOrderPositionAdapter) PreparePositionAdjustmentParams(tradeOrder *schema.TradeOrder) (mockTradeOrder *schema.TradeOrder, mockTradeActionResp *schema.TradeActionResp, de *domain_error.Error) {
-	return
-}
-
-func (a *TitansFiccOrderPositionAdapter) GetPositionCalculatorKeysForPurgingTask(tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, mockTradeOrders map[string][]*schema.TradeOrder, purgingLog *schema.DataPurgingLog) (positionCalculatorKeysToPurge []string) {
-	return
-}
-
-func (a *TitansFiccOrderPositionAdapter) ReloadPositionRecordsForPurgingTask(applicationConfig *domain_cfg.ApplicationCfg, purgingLog *schema.DataPurgingLog) (params []*order_position_manager.PositionCalculatorConstructParam) {
-	return
-}
-
-func (a *TitansFiccOrderPositionAdapter) ProcessPositionBaseDataSyncEvent(event *datamap.DataChangeEvent) {
-
-}
-
-func (a *TitansFiccOrderPositionAdapter) ParsePositionRecordFromReposRecord(extendAttrMap map[string]interface{}) (key string, positionRecord interface{}) {
-	return
-}
-
-func (a *TitansFiccOrderPositionAdapter) GetPositionCalculatorConstructParamForPositionRecord(positionRecord interface{}) (param *order_position_manager.PositionCalculatorConstructParam) {
-	return
-}
-
-func (a *TitansFiccOrderPositionAdapter) PreparePositionAdjustmentParamsByPositionBaseDiff(positionRecordBase, positionRecordCurr interface{}) (mockTradeOrder *schema.TradeOrder, mockTradeActionResp *schema.TradeActionResp, de *domain_error.Error) {
-	return
-}
-
-func (a *TitansFiccOrderPositionAdapter) PrepareForRecover(positionRecord interface{}) {
-
-}
-
-func (a *TitansFiccOrderPositionAdapter) UpdatePositionBaseDynamically()(dynamicallyUpdate bool) {
 	return
 }

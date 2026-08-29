@@ -10,7 +10,6 @@ import (
 	"rhino-core/schema"
 	"rhino-core/store/admin_store"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/manucorporat/try"
@@ -166,7 +165,7 @@ func (r *AutoSyncRepo) Get(collection string, key string) (val []map[string]inte
 	return
 }
 
-func (r *AutoSyncRepo) GetByKeyList(collection string, keyList []string) (val []map[string]interface{}, de *domain_error.Error) {
+func (r *AutoSyncRepo) GetByKeyList(collection string, keyList[]string) (val []map[string]interface{}, de *domain_error.Error) {
 	t, ok := r.tableMaps[collection]
 	if !ok {
 		de = domain_error.Build(domain_error.COLLECTION_NOT_FOUND_ERR_CODE, nil, collection)
@@ -183,7 +182,7 @@ func (r *AutoSyncRepo) GetByKeyList(collection string, keyList []string) (val []
 	return
 }
 
-func (r *AutoSyncRepo) GetMapData(collection string) (mapData map[string][]map[string]interface{}, de *domain_error.Error) {
+func  (r *AutoSyncRepo) GetMapData(collection string) (mapData map[string][]map[string]interface{}, de *domain_error.Error) {
 	t, ok := r.tableMaps[collection]
 	if !ok {
 		de = domain_error.Build(domain_error.COLLECTION_NOT_FOUND_ERR_CODE, nil, collection)
@@ -205,7 +204,7 @@ func (r *AutoSyncRepo) GetByFuzzyKey(collection string, key string) (val []map[s
 	return
 }
 
-func (r *AutoSyncRepo) GetSyncLogs() (syncLogs []*schema.DataSyncLog) {
+func (r *AutoSyncRepo) GetSyncLogs() (syncLogs[]*schema.DataSyncLog) {
 	for k, v := range r.tableMaps {
 		log.Printf("======>GetSyncLogs, key=%s\n", k)
 		syncLog, ok := v.GetSyncLog()
@@ -220,34 +219,10 @@ func (r *AutoSyncRepo) GetSyncLogs() (syncLogs []*schema.DataSyncLog) {
 	return
 }
 
-func (r *AutoSyncRepo) IsCollectionReady(collection string) bool {
+func  (r *AutoSyncRepo) IsCollectionReady(collection string) bool {
 	t, ok := r.tableMaps[collection]
 	if !ok {
 		return false
 	}
 	return t.IsReady()
-}
-
-// 判断是否所有PositionBase类型的数据集都已经就绪
-func (r *AutoSyncRepo) IsAllPositionBaseCollectionsReady() bool {
-
-	positionBasePrefix := strings.ToUpper("PositionBase")
-
-	for _, tableConfig := range r.config.TableConfigs {
-
-		if !strings.HasPrefix(strings.ToUpper(tableConfig.TableAlias), positionBasePrefix) &&
-			!strings.HasPrefix(strings.ToUpper(tableConfig.TableName), positionBasePrefix) {
-			continue
-		}
-
-		ready := r.IsCollectionReady(tableConfig.TableAlias)
-		if !ready {
-			log.Printf("PositionBase collection:%s is not ready...\n", tableConfig.TableAlias)
-			return false
-		}
-
-		log.Printf("PositionBase collection:%s is ready!\n", tableConfig.TableAlias)
-	}
-
-	return true
 }

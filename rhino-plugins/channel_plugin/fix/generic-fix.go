@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"rhino-common/context/constant"
 	"rhino-common/domain_error"
 	"rhino-common/enum"
 	"rhino-common/utils/dbutil"
@@ -272,11 +271,6 @@ func (c *GenericFIXChannel) processExecutionReport(msg *quickfix.Message) {
 	}
 
 	jsonutil.PrintSimple("======> received tradeActionResp:\n", tradeActionResp)
-
-	if len(tradeActionResp.OrdRejReason) > constant.MaxRejectMsgLen {
-		tradeActionResp.OrdRejReason = tradeActionResp.OrdRejReason[:constant.MaxRejectMsgLen]
-	}
-
 	c.tradeActionRespBuf <- tradeActionResp
 }
 
@@ -319,10 +313,6 @@ func (c *GenericFIXChannel) processOrderCancelReject(msg *quickfix.Message) {
 	// 对成交回报进行清洗
 	c.cleanTradeActionResp(tradeActionResp)
 
-	if len(tradeActionResp.OrdRejReason) > constant.MaxRejectMsgLen {
-		tradeActionResp.OrdRejReason = tradeActionResp.OrdRejReason[:constant.MaxRejectMsgLen]
-	}
-
 	c.tradeActionRespBuf <- tradeActionResp
 }
 
@@ -336,10 +326,6 @@ func (c *GenericFIXChannel) startProcessExecutionReportFromBuf() {
 
 					// 设置插入时间
 					tradeActionResp.DBInsertTime = timeutil.ConvertTimeToMilliseconds(time.Now())
-
-					if len(tradeActionResp.OrdRejReason) > 512 {
-						tradeActionResp.OrdRejReason = tradeActionResp.OrdRejReason[:512]
-					}
 
 					err := app_store.InsertTradeActionResp(tx, tradeActionResp)
 					if err != nil && !dbutil.IsMysqlDuplicateEntryError(err) { // 排除重复插入的错误

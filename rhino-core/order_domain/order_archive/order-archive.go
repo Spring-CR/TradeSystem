@@ -15,7 +15,6 @@ import (
 	"rhino-core/store/admin_store"
 	"rhino-core/store/app_store"
 	"rhino-core/types"
-	"strings"
 	"sync"
 	"time"
 )
@@ -31,33 +30,10 @@ type OrderArchiver struct {
 	_insertDataToExtendTradeOrderTableWithoutIDSql      string
 	_insertDataToExtendTradeActionRespTableWithIDSql    string
 	_insertDataToExtendTradeActionRespTableWithoutIDSql string
-
-	taskName                string
-	matchChannels           map[string]bool
-	dataArchiveCnBeginTime  string
-	dataArchiveCnLatestTime string
-	isDSTSensitive          *bool
-	isLast                  *bool
 }
 
-func NewOrderArchiver(applicationCfg *domain_cfg.ApplicationCfg, archivingCfg *schema.ApplicationArchivingCfgItem, orderCache *order_cache.OrderCache, scheduleAdapter schedule.ScheduleAdapter) *OrderArchiver {
-	inst := &OrderArchiver{applicationCfg: applicationCfg, orderCache: orderCache, lock: &sync.RWMutex{}, scheduleAdapter: scheduleAdapter, matchChannels: make(map[string]bool)}
-	if archivingCfg != nil {
-		inst.taskName = archivingCfg.TaskName
-		inst.dataArchiveCnBeginTime = archivingCfg.DataArchiveCnBeginTime
-		inst.dataArchiveCnLatestTime = archivingCfg.DataArchiveCnLatestTime
-		inst.isDSTSensitive = &archivingCfg.IsDSTSensitive
-		inst.isLast = &archivingCfg.IsLast
-		strs := strings.Split(archivingCfg.MatchChannels, ",")
-		for _, str := range strs {
-			str = strings.TrimSpace(str)
-			if len(str) == 0 {
-				continue
-			}
-			inst.matchChannels[str] = true
-		}
-		log.Printf("NewOrderArchiver for archivingCfg, taskName:%v, dataArchiveCnBeginTime:%v, dataArchiveCnLatestTime:%v, isDSTSensitive:%v, matchChannels:%v\n", inst.taskName, inst.dataArchiveCnBeginTime, inst.dataArchiveCnLatestTime, inst.isDSTSensitive)
-	}
+func NewOrderArchiver(applicationCfg *domain_cfg.ApplicationCfg, orderCache *order_cache.OrderCache, scheduleAdapter schedule.ScheduleAdapter) *OrderArchiver {
+	inst := &OrderArchiver{applicationCfg: applicationCfg, orderCache: orderCache, lock: &sync.RWMutex{}, scheduleAdapter: scheduleAdapter}
 	return inst
 }
 
@@ -74,14 +50,14 @@ func (a *OrderArchiver) Start() {
 	}()
 	go func() {
 		for {
-			log.Printf("archiving working %v===> %v\n", a.working, a.taskName)
-			time.Sleep(30 * time.Minute)
+			log.Printf("archiving working ===> %v\n", a.working)
+			time.Sleep(time.Minute)
 		}
 	}()
 }
 
 func (a *OrderArchiver) GetCurrentArchiveLog() (archivingLog *schema.DataArchivingLog, beginTimeSecond, endTimeSencond, currentTimeSecond int, systemCode, businessCode, dateStr string, err error) {
-	beginTimeSecond, endTimeSencond, err = a.applicationCfg.GetTimeRangeForDataArchiving(a.dataArchiveCnBeginTime, a.dataArchiveCnLatestTime, a.isDSTSensitive)
+	beginTimeSecond, endTimeSencond, err = a.applicationCfg.GetTimeRangeForDataArchiving()
 	log.Printf("======>GetTimeRangeForDataArchiving, beginTimeSecond: %d, endTimeSencond: %d\n", beginTimeSecond, endTimeSencond)
 	if err != nil {
 		return
@@ -108,8 +84,7 @@ func (a *OrderArchiver) GetCurrentArchiveLog() (archivingLog *schema.DataArchivi
 	// 如果diff>0，要进行时间前移
 	dateStr = time.Now().Add(time.Duration(-diff) * time.Duration(time.Second)).In(timeutil.CnTimeLocation).Format("20060102")
 
-	//archivingLog, err = admin_store.GetDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDate(a.applicationCfg.GetCentralDB(), systemCode, businessCode, dateStr)
-	archivingLog, err = admin_store.GetDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskName(a.applicationCfg.GetCentralDB(), systemCode, businessCode, dateStr, a.taskName)
+	archivingLog, err = admin_store.GetDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDate(a.applicationCfg.GetCentralDB(), systemCode, businessCode, dateStr)
 	if dbutil.IsDbRecordEmptyError(err) {
 		err = nil
 	}
@@ -127,15 +102,14 @@ func (a *OrderArchiver) shouldArchiveData(force bool) (archivingLog *schema.Data
 	}
 
 	if !force {
-		log.Printf("currentTimeSecond:%d, beginTimeSecond:%d, endTimeSencond:%d, taskName:%v\n", currentTimeSecond, beginTimeSecond, endTimeSencond, a.taskName)
+		log.Printf("currentTimeSecond:%d, beginTimeSecond:%d, endTimeSencond:%d\n", currentTimeSecond, beginTimeSecond, endTimeSencond)
 		if archivingLog != nil {
 			log.Printf("archivingLog, archivingLog.CompletePhase:%d, archivingLog.Complete:%v\n", archivingLog.CompletePhase, archivingLog.Complete)
 		}
 		shouldArchive = currentTimeSecond >= beginTimeSecond && currentTimeSecond <= endTimeSencond && (archivingLog == nil || !archivingLog.Complete)
 	} else {
 		log.Printf("force archiving, need to delete existed archivingLog first! systemCode:%s, businessCode:%s, dateStr:%s\n", systemCode, businessCode, dateStr)
-		//err = admin_store.DeleteDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDate(a.applicationCfg.GetCentralDB(), systemCode, businessCode, dateStr)
-		err = admin_store.DeleteDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskName(a.applicationCfg.GetCentralDB(), systemCode, businessCode, dateStr, a.taskName)
+		err = admin_store.DeleteDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDate(a.applicationCfg.GetCentralDB(), systemCode, businessCode, dateStr)
 		if err != nil {
 			domain_error.ProcessSevereError(false, 0, nil, err, "error occurs in OrderArchiver::DeleteDataArchivingLog")
 			return
@@ -151,7 +125,6 @@ func (a *OrderArchiver) shouldArchiveData(force bool) (archivingLog *schema.Data
 			SystemCode:           systemCode,
 			BusinessCode:         businessCode,
 			ArchivingDate:        dateStr,
-			TaskName:             a.taskName,
 			FirstArchivingTime:   currTime,
 			CurrentArchivingTime: currTime,
 			Complete:             false,
@@ -248,9 +221,6 @@ func (a *OrderArchiver) SplitTradeOrders(archivingLog *schema.DataArchivingLog) 
 		return order.GetBasicInfo().OrdStatus != string(enum.OrdStatus_Draft)
 	})
 
-	ordersToArchive = a.filterByChannelMap(ordersToArchive)
-	ordersToKeep = a.filterByChannelMap(ordersToKeep)
-
 	if archivingLog != nil && archivingLog.CompletePhase == int(enum.DataArchivingLogPhase_New) {
 		archivingLog.CompletePhase = int(enum.DataArchivingLogPhase_Ready)
 		err = admin_store.UpdateDataArchivingLogById(a.applicationCfg.GetCentralDB(), archivingLog)
@@ -260,18 +230,6 @@ func (a *OrderArchiver) SplitTradeOrders(archivingLog *schema.DataArchivingLog) 
 		}
 	}
 
-	return
-}
-
-func (a *OrderArchiver) filterByChannelMap(orders []*types.TraceableTradeOrder) (ordersFilter []*types.TraceableTradeOrder) {
-	if len(a.matchChannels) == 0 {
-		return orders
-	}
-	for _, order := range orders {
-		if a.matchChannels[order.GetBasicInfo().ChannelCode] {
-			ordersFilter = append(ordersFilter, order)
-		}
-	}
 	return
 }
 
@@ -329,8 +287,8 @@ func (a *OrderArchiver) createAndDumpToHistoricalTables(archivingLog *schema.Dat
 	// 删除当日已经归档的记录
 	tables := []string{historicalGroupTradeOrderTableName, historicalTradeActionLatestRespTableName, historicalTradeActionRespTableName, historicalTradeOrderTableName, extendHistoricalTradeOrderTableName, extendHistoricalTradeActionRespTableName}
 	for _, table := range tables {
-		log.Printf("DeleteHistoricalArchiveDate for table:%s, taskName:%s\n", table, archivingLog.TaskName)
-		err = app_store.DeleteHistoricalArchiveDate(a.applicationCfg.GetCentralDB(), table, archivingLog.ArchivingDate, archivingLog.TaskName)
+		log.Printf("DeleteHistoricalArchiveDate for table:%s\n", table)
+		err = app_store.DeleteHistoricalArchiveDate(a.applicationCfg.GetCentralDB(), table, archivingLog.ArchivingDate)
 		if err != nil {
 			domain_error.ProcessSevereError(false, 0, nil, err, "error occurs in OrderArchiver::DeleteHistoricalArchiveDate")
 			return
@@ -339,8 +297,8 @@ func (a *OrderArchiver) createAndDumpToHistoricalTables(archivingLog *schema.Dat
 
 	// 将OrderCache的数据存储到历史表
 	de := a.dumpDataToHistoricalTables(historicalGroupTradeOrderTableName, historicalTradeActionLatestRespTableName, historicalTradeActionRespTableName, historicalTradeOrderTableName, extendHistoricalTradeOrderTableName, extendHistoricalTradeActionRespTableName, archivingLog, orderMap, tradeOrders, tradeActionLatestResps, tradeActionResps)
-	log.Printf("dumpDataToHistoricalTables, historicalGroupTradeOrderTableName:%s, historicalTradeActionLatestRespTableName:%s, historicalTradeActionRespTableName:%s, historicalTradeOrderTableName:%s, extendHistoricalTradeOrderTableName:%s, extendHistoricalTradeActionRespTableName:%s, archivingLog:{%s,%s,%v,%v}, orderMap.Len:%d, tradeOrders.Len:%d, tradeActionLatestResps.Len:%d, tradeActionResps:%d\n",
-		historicalGroupTradeOrderTableName, historicalTradeActionLatestRespTableName, historicalTradeActionRespTableName, historicalTradeOrderTableName, extendHistoricalTradeOrderTableName, extendHistoricalTradeActionRespTableName, archivingLog.ArchivingDate, archivingLog.TaskName, archivingLog.Complete, archivingLog.CompletePhase, len(orderMap), len(tradeOrders), len(tradeActionLatestResps), len(tradeActionResps))
+	log.Printf("dumpDataToHistoricalTables, historicalGroupTradeOrderTableName:%s, historicalTradeActionLatestRespTableName:%s, historicalTradeActionRespTableName:%s, historicalTradeOrderTableName:%s, extendHistoricalTradeOrderTableName:%s, extendHistoricalTradeActionRespTableName:%s, archivingLog:{%s,%v,%v}, orderMap.Len:%d, tradeOrders.Len:%d, tradeActionLatestResps.Len:%d, tradeActionResps:%d\n",
+		historicalGroupTradeOrderTableName, historicalTradeActionLatestRespTableName, historicalTradeActionRespTableName, historicalTradeOrderTableName, extendHistoricalTradeOrderTableName, extendHistoricalTradeActionRespTableName, archivingLog.ArchivingDate, archivingLog.Complete, archivingLog.CompletePhase, len(orderMap), len(tradeOrders), len(tradeActionLatestResps), len(tradeActionResps))
 	if de != nil {
 		if de.Err != nil {
 			err = de.Err
@@ -360,12 +318,4 @@ func (a *OrderArchiver) createAndDumpToHistoricalTables(archivingLog *schema.Dat
 	}
 
 	return
-}
-
-func (a *OrderArchiver) GetTaskName() string {
-	return a.taskName
-}
-
-func (a *OrderArchiver) IsLast() *bool {
-	return a.isLast
 }

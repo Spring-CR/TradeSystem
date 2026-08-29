@@ -15,10 +15,6 @@ import (
 // 第4步：分析内存订单数据，拆分待清除和继续保留的数据
 func (a *OrderPurger) resetKafka(purgingLog *schema.DataPurgingLog) (err error) {
 
-	if a.orderArchiver.IsLast() != nil && !(*a.orderArchiver.IsLast()) {
-		return
-	}
-
 	if purgingLog.CompletePhase >= int(enum.DataPurgingLogPhase_ResetKafka) {
 		return
 	}

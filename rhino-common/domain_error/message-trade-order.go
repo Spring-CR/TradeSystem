@@ -53,10 +53,5 @@ func init() {
 		SHORT_SELL_AUTH_NOT_CONFIG_ERR_CODE:           `空头开仓的业务权限未配置，请联系业务人员`,
 		SHORT_SELL_SIMBOL_ERR_CODE:                    `%s不可用于空头开仓，请联系业务人员`,
 		CUST_QUAL_NOT_CORRECT_ERR_CODE:                `您的资质不满足业务要求，请联系业务人员`,
-		CANNOT_CHECK_DAY_IN_CALENDAR_ERR_CODE:         `无法判断日期 %s 是否可交易`,
-		COUNTERPARTY_AUTH_NOT_ENOUGH2_ERR_CODE:        `未开通%s交易权限，请联系业务人员`,
-		MARGIN_NOT_FOUND_ERR_CODE:                     `无法找到初保线参数，请联系业务人员`,
-		TRADE_FLAG_NOT_OPEN_ERR_CODE:                  `账号%v交易开关未开启，请联系业务人员`,
-		MEMBER_ACCOUNT_NOT_ALLOW_TRADE_ERR_CODE:       `账号%v归属账户组%v，请使用账户组下单`,
 	})
 }

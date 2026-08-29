@@ -18,7 +18,7 @@ type SecurityItem struct {
 	IssueDate                string `sql:"size: 16"`
 	ContractMonth            string `sql:"size: 12"`
 	ExpireDate               string `sql:"size: 16"`
-	SecurityType             string `sql:"size: 16"`
+	SecurityType             string `sql:"size: 2"`
 	UnderlyingSecurityCode   string `sql:"size: 64"`
 	UnderlyingSecurityZhName string `sql:"size: 128"`
 	UnderlyingSecurityEnName string `sql:"size: 64"`

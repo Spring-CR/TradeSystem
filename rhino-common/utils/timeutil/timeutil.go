@@ -280,7 +280,3 @@ func Until(timeStr, timeLayout, timeZone string) (time.Duration, error) {
 
 	return time.Until(endtime), nil
 }
-
-func GetTimeMinutes(t time.Time) int {
-	return t.Hour()*60 + t.Minute()
-}

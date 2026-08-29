@@ -47,15 +47,7 @@ func (a *OrderAcceptor) AcceptNewOrderSingleRequest(order *schema.TradeOrder) (d
 			// 注意：一开始是没有clOrdID的，因此，只能使用AppOrdID了
 			//de = pc.AcquireOrderQuota(false, order)
 			// 确保幂等，即同一个订单并发多次冻结也仅首次有效
-
-			// _, de = pm.FreezeQuota(false, order)
-			// if de != nil {
-			// 	de.Refine(domain_error.ERROR, order)
-			// 	return
-			// }
-
-			// force与当前是否审批通过的状态有关，如果是限额检查未通过的异常，需要保存一下
-			_, de = pm.FreezeQuota(order.ApproveStatus == int(enum.ApproveStatus_Approved), order)
+			_, de = pm.FreezeQuota(false, order)
 			if de != nil {
 				de.Refine(domain_error.ERROR, order)
 				return

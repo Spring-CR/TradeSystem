@@ -8,7 +8,7 @@ docker rm -vf trade-engine-titans-ficc; docker run --restart=always --name=trade
   -v /opt/rhino/titans-ficc/data/config/:/config_data/ \
   -p 8093:8093 \
   -p 8293:8293 \
-  dockertest.gf.com.cn/rhino/trade-engine-titans-ficc:b20251010-p1.4.6.9-latest
+  dockertest.gf.com.cn/rhino/trade-engine-titans-ficc:b20251010-p1.4.5.2-latest
 
 
 docker rm -vf trade-engine-titans-ficc; docker run --restart=always --name=trade-engine-titans-ficc -it -d \

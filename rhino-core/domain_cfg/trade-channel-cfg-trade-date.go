@@ -63,17 +63,17 @@ func (d *TradeChannelDetails) getExchangeDate(t time.Time) (dataNum int64, sleep
 	endTime = d.getTime(dateStr, d.TradeChannel.EndTime)
 
 	if beginTime.After(endTime) {
-		endTime = endTime.Add(24 * time.Hour)
+		endTime = endTime.Add(24*time.Hour)
 	}
 
 	if t.Before(beginTime) {
 		beginTime = beginTime.Add(-24 * time.Hour)
-		endTime = endTime.Add(-24 * time.Hour)
+		endTime = endTime.Add(-24*time.Hour)
 	}
 
 	sleepForNextDate = beginTime.Add(24 * time.Hour).Sub(t)
-
-	dateStr = beginTime.Add(time.Duration(24*d.TradeChannel.DataNumAdj) * time.Hour).In(timeutil.GetTimeZone(d.TradeChannel.DisplayTimeZone)).Format("20060102")
+	
+	dateStr = beginTime.In(timeutil.GetTimeZone(d.TradeChannel.DisplayTimeZone)).Format("20060102")
 	dataNum = timeutil.Parse8BitDateStrToNum(dateStr)
 
 	return

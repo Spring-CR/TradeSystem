@@ -23,27 +23,15 @@ const (
 	OrderCacheSyncMessageType_SyncOrder                    = 7
 	OrderCacheSyncMessageType_SyncTradeActionLatestResp    = 8
 	OrderCacheSyncMessageType_UpdateTradeOrderAttributes   = 9
-	OrderCacheSyncMessageType_AdjustPosition               = 10
 )
 
 type OrderCacheSyncMessage struct {
-	MessageType                     OrderCacheSyncMessageType
-	TradeOrder                      *schema.TradeOrder
-	TradeActionLatestResp           *schema.TradeActionLatestResp
-	TradeActionResp                 *schema.TradeActionResp
-	UpdateAttributes                map[string]interface{}
-	AppOrdID                        string
-	AppOrdIDMap                     map[string]bool
-	ClOrdIDMap                      map[string]bool
-	ComposeOrdIDMap                 map[string]bool
-	ActionKeyMap                    map[string]bool
-	TradeOrdersToKeep               []*schema.TradeOrder
-	TradeActionLatestRespsToKeep    []*schema.TradeActionLatestResp
-	TradeActionRespsToKeep          []*schema.TradeActionResp
-	TradeOrdersToArchive            []*schema.TradeOrder
-	TradeActionLatestRespsToArchive []*schema.TradeActionLatestResp
-	TradeActionRespsToArchive       []*schema.TradeActionResp
-	PurgingLog                      *schema.DataPurgingLog
+	MessageType           OrderCacheSyncMessageType
+	TradeOrder            *schema.TradeOrder
+	TradeActionLatestResp *schema.TradeActionLatestResp
+	TradeActionResp       *schema.TradeActionResp
+	UpdateAttributes      map[string]interface{}
+	AppOrdID              string
 }
 
 func (m *OrderCacheSyncMessage) GetMsgTime() int64 {
@@ -148,21 +136,9 @@ func newOrderCacheSyncMessageForUpdateTradeOrderAttributes(appOrdID string, upda
 	return
 }
 
-func newResetMessage(appOrdIDMap, clOrdIDMap, composeOrdIDMap, actionKeyMap map[string]bool, tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp,
-	tadeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, purgingLog *schema.DataPurgingLog) (jsData []byte, err error) {
+func newResetMessage() (jsData []byte, err error) {
 	msg := &OrderCacheSyncMessage{
-		MessageType:                     OrderCacheSyncMessageType_Reset,
-		AppOrdIDMap:                     appOrdIDMap,
-		ClOrdIDMap:                      clOrdIDMap,
-		ComposeOrdIDMap:                 composeOrdIDMap,
-		ActionKeyMap:                    actionKeyMap,
-		TradeOrdersToKeep:               tradeOrdersToKeep,
-		TradeActionLatestRespsToKeep:    tradeActionLatestRespsToKeep,
-		TradeActionRespsToKeep:          tradeActionRespsToKeep,
-		TradeOrdersToArchive:            tadeOrdersToArchive,
-		TradeActionLatestRespsToArchive: tradeActionLatestRespsToArchive,
-		TradeActionRespsToArchive:       tradeActionRespsToArchive,
-		PurgingLog:                      purgingLog,
+		MessageType: OrderCacheSyncMessageType_Reset,
 	}
 	jsData, err = json.Marshal(msg)
 	return
@@ -181,16 +157,6 @@ func newOrderCacheSyncMessageForSyncTradeActionLatestResp(tradeActionLatestResp 
 	msg := &OrderCacheSyncMessage{
 		MessageType:           OrderCacheSyncMessageType_SyncTradeActionLatestResp,
 		TradeActionLatestResp: tradeActionLatestResp,
-	}
-	jsData, err = json.Marshal(msg)
-	return
-}
-
-func newOrderCacheSyncMessageForAdjustPosition(mockTradeOrder *schema.TradeOrder, mockTradeActionResp *schema.TradeActionResp) (jsData []byte, err error) {
-	msg := &OrderCacheSyncMessage{
-		MessageType:     OrderCacheSyncMessageType_AdjustPosition,
-		TradeOrder:      mockTradeOrder,
-		TradeActionResp: mockTradeActionResp,
 	}
 	jsData, err = json.Marshal(msg)
 	return

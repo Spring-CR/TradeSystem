@@ -39,7 +39,7 @@ func main() {
 		tradeChannelDetailsList = append(tradeChannelDetailsList, tradeChannelDetails)
 	}
 
-	applicationCfg, de := domain_cfg.NewApplicationCfg(config.Application, config.ApplicationArchivingCfgItems, nil, config.ExtendAttrItems, nil, nil, tradeChannelDetailsList)
+	applicationCfg, de := domain_cfg.NewApplicationCfg(config.Application, nil, config.ExtendAttrItems, nil, nil, tradeChannelDetailsList)
 	if de != nil {
 		panic(de)
 	}

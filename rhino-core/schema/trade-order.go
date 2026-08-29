@@ -26,7 +26,7 @@ type TradeOrder struct {
 	SymbolSfx              string `sql:"size: 8"`
 	SecurityID             string `sql:"size: 64"`
 	IDSource               string `sql:"size: 2"`
-	SecurityType           string `sql:"size: 16"`
+	SecurityType           string `sql:"size: 2"`
 	Side                   string `sql:"size: 2"`
 	TransactTime           int64
 	TradeDate              int64

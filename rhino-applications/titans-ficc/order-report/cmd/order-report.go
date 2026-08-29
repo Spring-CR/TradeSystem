@@ -78,7 +78,7 @@ func action(c *cli.Context) error {
 		tradeChannelDetailsList = append(tradeChannelDetailsList, tradeChannelDetails)
 	}
 
-	applicationCfg, de := domain_cfg.NewApplicationCfg(config.Application, config.ApplicationArchivingCfgItems, config.ApplicationCfgItems, config.ExtendAttrItems, config.PositionAttrItems, config.TradeActionRespAttrItems, tradeChannelDetailsList)
+	applicationCfg, de := domain_cfg.NewApplicationCfg(config.Application, config.ApplicationCfgItems, config.ExtendAttrItems, config.PositionAttrItems, config.TradeActionRespAttrItems, tradeChannelDetailsList)
 	if de != nil {
 		panic(de)
 	}

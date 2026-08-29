@@ -41,15 +41,3 @@ type ApplicationCfgItem struct {
 	Description            string
 	Required               int
 }
-
-type ApplicationArchivingCfgItem struct {
-	ID                      int64
-	SystemCode              string `sql:"unique: pk_aaci, size: 32"`
-	BusinessCode            string `sql:"index: pk_aaci, size: 32"`
-	TaskName                string `sql:"index: pk_aaci, size: 32"`
-	MatchChannels           string
-	DataArchiveCnBeginTime  string `sql:"size: 64"`
-	DataArchiveCnLatestTime string `sql:"size: 64"`
-	IsDSTSensitive          bool
-	IsLast                  bool // 如果遇到的是最后一个，需要清理kafka
-}

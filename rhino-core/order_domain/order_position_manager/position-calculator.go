@@ -1,7 +1,6 @@
 package order_position_manager
 
 import (
-	"log"
 	"rhino-common/domain_error"
 	"rhino-common/utils/logger"
 	"rhino-common/utils/timeutil"
@@ -19,8 +18,6 @@ type PositionCalculator struct {
 	positionAdapter PositionAdapter // 持仓适配器
 	orderLog        *logger.OrderLog
 	persisFunc      func(evt *PositionChangeEvent)
-	calEventList    []*PositionCalculatorEvent
-	successor       *PositionCalculator // 发生replay时会被设置
 }
 
 func NewPositionCalculator(key string, tradeOrder *schema.TradeOrder, positionAdapter PositionAdapter, orderLog *logger.OrderLog, persisFunc func(evt *PositionChangeEvent)) *PositionCalculator {
@@ -50,28 +47,10 @@ func NewPositionCalculatorByConstructParam(param *PositionCalculatorConstructPar
 	return inst
 }
 
-func (c *PositionCalculator) HasSufficientQuota(tradeOrder *schema.TradeOrder) (sufficient bool, de *domain_error.Error) {
-
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	if c.successor != nil {
-		return c.HasSufficientQuota(tradeOrder)
-	}
-
-	sufficient, de = c.positionAdapter.HasSufficientQuota(c.positionUnits, tradeOrder, c.metadata)
-
-	return
-}
-
 func (c *PositionCalculator) FreezeQuota(force bool, tradeOrder *schema.TradeOrder) (sufficient bool, de *domain_error.Error) {
 
 	c.lock.Lock()
 	defer c.lock.Unlock()
-
-	if c.successor != nil {
-		return c.FreezeQuota(force, tradeOrder)
-	}
 
 	if !force {
 		sufficient, de = c.positionAdapter.HasSufficientQuota(c.positionUnits, tradeOrder, c.metadata)
@@ -79,11 +58,7 @@ func (c *PositionCalculator) FreezeQuota(force bool, tradeOrder *schema.TradeOrd
 			return
 		}
 	}
-	
-	if tradeOrder.QuotaValidateTime == 0 {
-		tradeOrder.QuotaValidateTime = timeutil.ConvertTimeToMicroseconds(time.Now())
-	}
-
+	tradeOrder.QuotaValidateTime = timeutil.ConvertTimeToMicroseconds(time.Now())
 	n := len(c.positionUnits)
 	for i, positionUnit := range c.positionUnits {
 		positionUnit.freezeQuota(c.positionAdapter, c.metadata, tradeOrder, i == n-1)
@@ -93,8 +68,6 @@ func (c *PositionCalculator) FreezeQuota(force bool, tradeOrder *schema.TradeOrd
 		c.persisFunc(&PositionChangeEvent{InsertOrUpdate: 0, PositionData: c.positionAdapter.GeneralizePositionRecord(c.metadata, true)})
 	}
 
-	c.AddFreezeQuotaEvent(tradeOrder)
-
 	return
 }
 
@@ -102,11 +75,6 @@ func (c *PositionCalculator) RollbackFreezeQuota(tradeOrder *schema.TradeOrder) 
 
 	c.lock.Lock()
 	defer c.lock.Unlock()
-
-	if c.successor != nil {
-		c.successor.RollbackFreezeQuota(tradeOrder)
-		return
-	}
 
 	n := len(c.positionUnits)
 	for i, positionUnit := range c.positionUnits {
@@ -116,43 +84,19 @@ func (c *PositionCalculator) RollbackFreezeQuota(tradeOrder *schema.TradeOrder) 
 	if c.persisFunc != nil {
 		c.persisFunc(&PositionChangeEvent{InsertOrUpdate: 1, PositionData: c.positionAdapter.GeneralizePositionRecord(c.metadata, false)})
 	}
-
-	c.AddRollbackFreezeQuotaEvent(tradeOrder)
 }
 
 func (c *PositionCalculator) UpdatePositionByTradeResp(tradeResp *types.TradeActionRespReturn) {
-	
-	log.Println("start to UpdatePositionByTradeResp")
-
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	log.Println("enter UpdatePositionByTradeResp")
-
-	if c.successor != nil {
-		log.Println("successor of UpdatePositionByTradeResp")
-		c.successor.UpdatePositionByTradeResp(tradeResp)
-		return
-	}
-
 	c.increaseQuotaByFillReport(tradeResp)
 	c.unfreezeQuotaByTradeResp(tradeResp)
-
-	log.Println("before AfterUpdateQuota")
-
 	c.positionAdapter.AfterUpdateQuota(tradeResp, c.metadata)
-
-	log.Println("after AfterUpdateQuota")
 
 	if c.persisFunc != nil {
 		c.persisFunc(&PositionChangeEvent{InsertOrUpdate: 1, PositionData: c.positionAdapter.GeneralizePositionRecord(c.metadata, false)})
 	}
-
-	log.Println("before UpdatePositionByTradeResp")
-
-	c.AddUpdatePositionByTradeRespEvent(tradeResp)
-
-	log.Println("after UpdatePositionByTradeResp")
 }
 
 func (c *PositionCalculator) increaseQuotaByFillReport(tradeResp *types.TradeActionRespReturn) {

@@ -5,7 +5,6 @@ import (
 	"rhino-core/domain_cfg"
 	"rhino-core/schema"
 	"rhino-core/types"
-	"rhino-data/datamap"
 )
 
 type PositionAdapter interface {
@@ -21,21 +20,10 @@ type PositionAdapter interface {
 	GetPositionCalculatorConstructParams(tradeOrder *schema.TradeOrder) (param *PositionCalculatorConstructParam)
 	LoadInitPositionRecords(applicationConfig *domain_cfg.ApplicationCfg) (params []*PositionCalculatorConstructParam)
 	GeneralizePositionRecord(metadata interface{}, insert bool) map[string]interface{}
-	GetQuotaNotEnoughHandler() func(tradeOrder *schema.TradeOrder, de *domain_error.Error)
-	PreparePositionAdjustmentParams(tradeOrder *schema.TradeOrder) (mockTradeOrder *schema.TradeOrder, mockTradeActionResp *schema.TradeActionResp, de *domain_error.Error)
-	GetPositionCalculatorKeysForPurgingTask(tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, mockTradeOrders map[string][]*schema.TradeOrder, purgingLog *schema.DataPurgingLog) (positionCalculatorKeysToPurge []string)
-	ReloadPositionRecordsForPurgingTask(applicationConfig *domain_cfg.ApplicationCfg, purgingLog *schema.DataPurgingLog) (params []*PositionCalculatorConstructParam)
-	ProcessPositionBaseDataSyncEvent(event *datamap.DataChangeEvent)
-	ParsePositionRecordFromReposRecord(extendAttrMap map[string]interface{}) (key string, positionRecord interface{})
-	GetPositionCalculatorConstructParamForPositionRecord(positionRecord interface{}) (param *PositionCalculatorConstructParam)
-	PreparePositionAdjustmentParamsByPositionBaseDiff(positionRecordBase, positionRecordCurr interface{}) (mockTradeOrder *schema.TradeOrder, mockTradeActionResp *schema.TradeActionResp, de *domain_error.Error)
-	PrepareForRecover(positionRecord interface{})
-	UpdatePositionBaseDynamically()(dynamicallyUpdate bool)
 }
 
 type PositionChangeEvent struct {
-	TableName      string
-	InsertOrUpdate int // 0 - insert, 1 - update, 2 - delete
+	InsertOrUpdate int // 0 - insert, 1 - update
 	PositionData   map[string]interface{}
 }
 

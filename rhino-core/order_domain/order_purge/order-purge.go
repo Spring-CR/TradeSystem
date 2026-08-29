@@ -79,7 +79,7 @@ func (a *OrderPurger) shouldPurgeData(force bool) (purgingLog *schema.DataPurgin
 	}
 
 	if shouldPurge {
-		purgingLog, err = admin_store.GetDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskName(a.applicationCfg.GetCentralDB(), systemCode, businessCode, dateStr, archivingLog.TaskName)
+		purgingLog, err = admin_store.GetDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDate(a.applicationCfg.GetCentralDB(), systemCode, businessCode, dateStr)
 		if dbutil.IsDbRecordEmptyError(err) {
 			err = nil
 		}
@@ -101,7 +101,6 @@ func (a *OrderPurger) shouldPurgeData(force bool) (purgingLog *schema.DataPurgin
 			SystemCode:         systemCode,
 			BusinessCode:       businessCode,
 			PurgingDate:        dateStr,
-			TaskName:           archivingLog.TaskName,
 			FirstPurgingTime:   currTime,
 			CurrentPurgingTime: currTime,
 			Complete:           false,
@@ -137,8 +136,7 @@ func (a *OrderPurger) orderPurging(purgingLog *schema.DataPurgingLog) {
 	var tradeActionRespsToKeep []*schema.TradeActionResp
 	var tradeOrdersToArchive []*schema.TradeOrder
 	var tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp
-	var tradeActionRespsToArchive []*schema.TradeActionResp
-	tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, tradeOrdersToArchive, tradeActionLatestRespsToArchive, tradeActionRespsToArchive, err = a.preparePurgingInfo(purgingLog)
+	tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, tradeOrdersToArchive, tradeActionLatestRespsToArchive, _, err = a.preparePurgingInfo(purgingLog)
 	if err != nil {
 		return
 	}
@@ -146,7 +144,7 @@ func (a *OrderPurger) orderPurging(purgingLog *schema.DataPurgingLog) {
 	log.Printf("tradeOrdersToKeep.Len=%d, tradeActionLatestRespsToKeep.Len=%d, tradeActionRespsToKeep.Len=%d, tradeOrdersToArchive.Len=%d, tradeActionLatestRespsToArchive.Len=%d\n", len(tradeOrdersToKeep), len(tradeActionLatestRespsToKeep), len(tradeActionRespsToKeep), len(tradeOrdersToArchive), len(tradeActionLatestRespsToArchive))
 
 	// 重置数据库数据
-	err = a.resetDB(tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, tradeOrdersToArchive, tradeActionLatestRespsToArchive, tradeActionRespsToArchive, purgingLog)
+	err = a.resetDB(tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, purgingLog)
 	if err != nil {
 		return
 	}
@@ -162,7 +160,7 @@ func (a *OrderPurger) orderPurging(purgingLog *schema.DataPurgingLog) {
 	log.Printf("finis purging kafka!")
 
 	// 重置内存模型
-	err = a.resetMem(tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, tradeOrdersToArchive, tradeActionLatestRespsToArchive, tradeActionRespsToArchive, purgingLog)
+	err = a.resetMem(tradeOrdersToArchive, tradeActionLatestRespsToArchive, purgingLog)
 	if err != nil {
 		return
 	}
@@ -171,7 +169,7 @@ func (a *OrderPurger) orderPurging(purgingLog *schema.DataPurgingLog) {
 
 	if a.scheduleAdapter != nil {
 		// 当scheduleAdapter不为空时，需要执行项目自定义的清理任务
-		err = a.scheduleAdapter.ExecCustomizedPurgingTask(tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, tradeOrdersToArchive, tradeActionLatestRespsToArchive, tradeActionRespsToArchive, purgingLog, a.positionManager)
+		err = a.scheduleAdapter.ExecCustomizedPurgingTask(tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, tradeOrdersToArchive, tradeActionLatestRespsToArchive, purgingLog, a.positionManager)
 		if err != nil {
 			return
 		}
@@ -285,8 +283,7 @@ func (a *OrderPurger) preparePurgingInfo(purgingLog *schema.DataPurgingLog) (
 	var tradeOrderKeys []string
 	var tradeActionLatestRespKeys []string
 	var tradeActionRespKeys []string
-	for i, v := range tradeOrdersToArchive {
-		log.Printf("#%d order to archive, id=%v, appOrdID=%v\n", i+1, v.ID, v.AppOrdID)
+	for _, v := range tradeOrdersToArchive {
 		tradeOrderKeys = append(tradeOrderKeys, v.AppOrdID)
 	}
 	for _, v := range tradeActionLatestRespsToArchive {

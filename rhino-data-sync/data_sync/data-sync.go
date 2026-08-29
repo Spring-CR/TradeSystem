@@ -103,48 +103,16 @@ func (s *DataSync) syncDataForTable(tableConfig *dbutil.TableConfig) {
 	location := timeutil.GetTimeZone(mrkCloseTimeZone)
 	dateStr := time.Now().In(location).Format(time.DateOnly)
 	datetimeStr := dateStr + " " + mrkCloseTime
-	mrkBeginTime := s.dataSyncCfg.GetMrkBeginTime()
 
-	closeTime, err := time.ParseInLocation(time.DateTime, datetimeStr, location)
-	if err != nil {
-		domain_error.ProcessSevereError(true, 5, nil, err, "fail to parse closeTime:"+datetimeStr)
-	}
-
+	closeTime, _ := time.ParseInLocation(time.DateTime, datetimeStr, location)
 	currTime := time.Now().In(location)
-
-	if mrkBeginTime == "" {
-		if currTime.After(closeTime) {
-			dateStr = currTime.Add(24 * time.Hour).Format(time.DateOnly)
-		}
-	} else {
-		beginTime, err := time.ParseInLocation(time.DateTime, dateStr+" "+mrkBeginTime, location)
-		if err != nil {
-			domain_error.ProcessSevereError(true, 5, nil, err, "fail to parse beginTime:"+datetimeStr)
-		}
-
-		// -----------begin-------------end----------
-		// -----------end---------------begin--------
-
-		if beginTime.Before(closeTime) {
-
-			if currTime.After(closeTime) {
-				dateStr = currTime.Add(24 * time.Hour).Format(time.DateOnly)
-			}
-
-		} else {
-
-			if currTime.Before(closeTime) {
-				dateStr = currTime.Add(-24 * time.Hour).Format(time.DateOnly)
-			}
-
-		}
+	if currTime.After(closeTime) {
+		dateStr = currTime.Add(24 * time.Hour).Format(time.DateOnly)
 	}
 
 	// 数据库中的日期没有中划线
 	dateStr = strings.ReplaceAll(dateStr, "-", "")
 	systemCode, businessCode := s.dataSyncCfg.GetSystemAndBusinessCode()
-
-	log.Printf("mrkBeginTime:%v, mrkCloseTime:%v, dateStr:%v, systemCode:%v, businessCode:%v\n", mrkBeginTime, mrkCloseTime, dateStr, systemCode, businessCode)
 
 	dataSyncLogs, err := admin_store.FindDataSyncLogsBySystemCodeAndBusinessCodeAndSyncDateAndTableName(s.dataSyncCfg.GetCentralDB(), systemCode, businessCode, dateStr, tableConfig.TableName)
 
@@ -660,7 +628,7 @@ func (s *DataSync) syncDataForTableAndSyncTypeByCsv(tableConfig *dbutil.TableCon
 	log.Printf("======> data sync log for table %v is complete", dataSyncLog.TableName)
 }
 
-func (s *DataSync) refineCsvContent(tableConfig *dbutil.TableConfig, body []byte) ([]byte, error) {
+func(s*DataSync)refineCsvContent(tableConfig*dbutil.TableConfig, body[]byte)([]byte, error){
 	if s.dataSyncAdapter == nil {
 		return body, nil
 	}

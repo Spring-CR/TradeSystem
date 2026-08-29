@@ -53,10 +53,9 @@ type OrderCache struct {
 	_afterUpdateTradeOrderDraft        func(tradeActionLatestResp *schema.TradeActionLatestResp, order *schema.TradeOrder)
 	_afterDeleteTradeOrderDraft        func(tradeActionLatestResp *schema.TradeActionLatestResp, order *schema.TradeOrder)
 	_afterUpdateTradeOrderAttributes   func(appOrdID string, updateAttrs map[string]interface{})
-	_afterReset                        func(tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, purgingLog *schema.DataPurgingLog)
+	_afterReset                        func()
 	_afterSyncOrder                    func(tradeOrder *schema.TradeOrder)
 	_afterSyncTradeActionLatestResp    func(tradeActionLatestResp *schema.TradeActionLatestResp)
-	_afterAdjustPosition               func(mockTradeOrder *schema.TradeOrder, mockTradeActionResp *schema.TradeActionResp)
 
 	lookUpTraceableTradeActionResp        func(directOrderMap map[string]*types.TraceableTradeOrder, tradeActionResp *schema.TradeActionResp, tradeActionRespMap map[string]*types.TraceableTradeActionResp) (traceableTradeActionResp *types.TraceableTradeActionResp, ok bool)
 	updateTradeActionLatestResp           func(tradeActionResp *schema.TradeActionResp, traceableTradeActionResp *types.TraceableTradeActionResp)
@@ -71,10 +70,9 @@ func NewOrderCache(master bool, applicationCfg *domain_cfg.ApplicationCfg, posit
 	afterUpdateTradeOrderDraft func(tradeActionLatestResp *schema.TradeActionLatestResp, order *schema.TradeOrder),
 	afterDeleteTradeOrderDraft func(tradeActionLatestResp *schema.TradeActionLatestResp, order *schema.TradeOrder),
 	afterUpdateTradeOrderAttributes func(appOrdID string, updateAttrs map[string]interface{}),
-	afterReset func(tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, purgingLog *schema.DataPurgingLog),
+	afterReset func(),
 	afterSyncOrder func(tradeOrder *schema.TradeOrder),
-	afterSyncTradeActionLatestResp func(tradeActionLatestResp *schema.TradeActionLatestResp),
-	afterAdjustPosition func(mockTradeOrder *schema.TradeOrder, mockTradeActionResp *schema.TradeActionResp)) *OrderCache {
+	afterSyncTradeActionLatestResp func(tradeActionLatestResp *schema.TradeActionLatestResp)) *OrderCache {
 
 	inst := &OrderCache{
 		master:                             master,
@@ -95,7 +93,6 @@ func NewOrderCache(master bool, applicationCfg *domain_cfg.ApplicationCfg, posit
 		_afterReset:                        afterReset,
 		_afterSyncOrder:                    afterSyncOrder,
 		_afterSyncTradeActionLatestResp:    afterSyncTradeActionLatestResp,
-		_afterAdjustPosition:               afterAdjustPosition,
 		lookUpTraceableTradeActionResp:     defaultLookUpTraceableTradeActionResp,
 	}
 
@@ -272,7 +269,7 @@ func (c *OrderCache) AddRootTradeOrder(order *schema.TradeOrder) {
 	c.afterAddRootTradeOrder(newOrder)
 }
 
-func (c *OrderCache) UpdateByTradeActionResp(tradeActionResp *schema.TradeActionResp) (orderUpdateAttributes map[string]interface{}) {
+func (c *OrderCache) UpdateByTradeActionResp(tradeActionResp *schema.TradeActionResp)(orderUpdateAttributes map[string]interface{}) {
 	_, orderUpdateAttributes = c.doUpdateByTradeActionResp(tradeActionResp, true, false)
 	return
 }

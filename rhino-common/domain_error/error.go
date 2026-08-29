@@ -52,10 +52,6 @@ func (e *Error) SimpleErrorString() string {
 	return fmt.Sprintf("error code:%s, message:%s, \nstack:%s\n", errCode, errMsg, e.Stack)
 }
 
-func (e *Error) SimpleErrorStringForUser() string {
-	return fmt.Sprintf("error:%s\n", e.Msg)
-}
-
 func (e *Error) MarshalJSON() (data []byte, err error) {
 	type ErrorAlias Error
 	errStruct := &struct {

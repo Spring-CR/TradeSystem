@@ -85,80 +85,13 @@ func (c *OrderCache) getHistoricalOrderCacheSyncMessages() (newestOffest, oldest
 		return
 	}
 
-	// 因为20260803之后涉及多轮归档了，不能只判断到OrderCacheSyncMessageType_Reset就直接截断
-	// i := n - 1
-	// for ; i >= 0; i-- {
-	// 	if syncMsgs[i].MessageType == OrderCacheSyncMessageType_Reset {
-	// 		break
-	// 	}
-	// }
-	// syncMsgs = syncMsgs[i+1:]
-	appOrdIDMap := make(map[string]bool)
-	clOrdIDMap := make(map[string]bool)
-	composeOrdIDMap := make(map[string]bool)
-	actionKeyMap := make(map[string]bool)
-	for _, syncMsg := range syncMsgs {
-		if syncMsg.MessageType != OrderCacheSyncMessageType_Reset {
-			continue
-		}
-		for k, v := range syncMsg.AppOrdIDMap {
-			appOrdIDMap[k] = v
-		}
-		for k, v := range syncMsg.ClOrdIDMap {
-			clOrdIDMap[k] = v
-		}
-		for k, v := range syncMsg.ComposeOrdIDMap {
-			composeOrdIDMap[k] = v
-		}
-		for k, v := range syncMsg.ActionKeyMap {
-			actionKeyMap[k] = v
+	i := n - 1
+	for ; i >= 0; i-- {
+		if syncMsgs[i].MessageType == OrderCacheSyncMessageType_Reset {
+			break
 		}
 	}
-
-	var newSyncMsgs []*OrderCacheSyncMessage
-	for _, syncMsg := range syncMsgs {
-		switch syncMsg.MessageType {
-		case OrderCacheSyncMessageType_AddRootTradeOrder:
-			tradeOrder := syncMsg.TradeOrder
-			if tradeOrder == nil {
-				continue
-			}
-			if appOrdIDMap[tradeOrder.AppOrdID] || clOrdIDMap[tradeOrder.ClOrdID] {
-				continue
-			}
-
-		case OrderCacheSyncMessageType_AddTradeActionForDirectOrder:
-			tradeActionLatestResp := syncMsg.TradeActionLatestResp
-			if tradeActionLatestResp == nil {
-				continue
-			}
-			if actionKeyMap[tradeActionLatestResp.ActionKey] {
-				continue
-			}
-
-		case OrderCacheSyncMessageType_UpdateByTradeActionResp: //其实最重要是需要这个消息类型
-			tradeActionResp :=syncMsg.TradeActionResp
-			if tradeActionResp == nil {
-				continue
-			}
-			if clOrdIDMap[tradeActionResp.ClOrdID] || clOrdIDMap[tradeActionResp.OrigClOrdID] {
-				continue
-			}
-
-		case OrderCacheSyncMessageType_UpdateTradeOrderDraft:
-		case OrderCacheSyncMessageType_DeleteTradeOrderDraft:
-		case OrderCacheSyncMessageType_Reset:
-			continue
-		case OrderCacheSyncMessageType_SyncOrder:
-		case OrderCacheSyncMessageType_SyncTradeActionLatestResp:
-		case OrderCacheSyncMessageType_UpdateTradeOrderAttributes:
-			continue
-		}
-
-		newSyncMsgs = append(newSyncMsgs, syncMsg)
-	}
-
-	syncMsgs = newSyncMsgs
+	syncMsgs = syncMsgs[i+1:]
 
 	return
 }

@@ -257,24 +257,6 @@
                     "columnAlias": "BusinessType",
                     "columnType": 0,
                     "columnLen": 100
-                },
-                {
-                    "columnName": "GROUP_FLAG",
-                    "columnAlias": "GroupAccountFlag",
-                    "columnType": 0,
-                    "columnLen": 32
-                },
-                {
-                    "columnName": "GROUP_TRADABLE",
-                    "columnAlias": "GroupAccountTradable",
-                    "columnType": 0,
-                    "columnLen": 8
-                },
-                {
-                    "columnName": "CTPTY_GROUP_ID",
-                    "columnAlias": "CounterpartyGroupID",
-                    "columnType": 5,
-                    "columnLen": 0
                 }
             ],
             "indexes": [
@@ -465,7 +447,7 @@
                 }
             ]
         },
-        {
+	    {
             "tableName": "counterpartyPhoneNum",
             "tableAlias": "CounterpartyPhoneNum",
             "characterSet": "utf8mb4",
@@ -831,7 +813,7 @@
                     "columnType": 0,
                     "columnLen": 30
                 },
-                {
+		{
                     "columnName": "quantity",
                     "columnAlias": "Quantity",
                     "columnType": 2
@@ -842,7 +824,7 @@
                     "columnType": 0,
                     "columnLen": 8
                 },
-                {
+		{
                     "columnName": "baseDirtyCost",
                     "columnAlias": "BaseDirtyCost",
                     "columnType": 2
@@ -950,11 +932,11 @@
                     "columnType": 5,
                     "columnLen": 0
                 },
-                {
+		{
                     "columnName": "ID",
                     "columnAlias": "ID",
                     "columnType": 5
-                },
+		},
                 {
                     "columnName": "INS_FAMILY",
                     "columnAlias": "SecurityType",
@@ -1013,7 +995,7 @@
                     "columnType": 0,
                     "columnLen": 64
                 },
-                {
+		{
                     "columnName": "FUTURE_VARIETY",
                     "columnAlias": "FutureVariety",
                     "columnType": 1
@@ -1024,7 +1006,7 @@
                     "columnType": 0,
                     "columnLen": 64
                 },
-                {
+		{
                     "columnName": "NOTIONAL",
                     "columnAlias": "Notional",
                     "columnType": 0,
@@ -1091,11 +1073,11 @@
                     "columnType": 5,
                     "columnLen": 0
                 },
-                {
+		{
                     "columnName": "ID",
                     "columnAlias": "ID",
                     "columnType": 5
-                },
+		},
                 {
                     "columnName": "INS_FAMILY",
                     "columnAlias": "SecurityType",
@@ -1113,7 +1095,7 @@
                     "columnAlias": "InterestRatio",
                     "columnType": 2
                 },
-                {
+		{
                     "columnName": "REMARK",
                     "columnAlias": "Remark",
                     "columnType": 0,
@@ -1129,7 +1111,7 @@
                     "columnName": "INTEREST_TYPE",
                     "columnAlias": "InterestType",
                     "columnType": 0,
-                    "columnLen": 64
+		    "columnLen": 64
                 },
                 {
                     "columnName": "INTEREST_RATE",
@@ -1142,7 +1124,7 @@
                     "columnType": 0,
                     "columnLen": 20
                 },
-                {
+		{
                     "columnName": "KEY_INTEREST_ID",
                     "columnAlias": "keyInterestID",
                     "columnType": 5
@@ -1164,7 +1146,7 @@
                     "columnAlias": "Spread",
                     "columnType": 2
                 },
-                {
+		{
                     "columnName": "LOOKBACK_PERIOD",
                     "columnAlias": "LookbackPeriod",
                     "columnType": 1
@@ -1174,7 +1156,7 @@
                     "columnAlias": "InterestDirection",
                     "columnType": 1
                 },
-                {
+		{
                     "columnName": "IS_INCLUDE_LEND_INTEREST",
                     "columnAlias": "IncludeLendInterestFlag",
                     "columnType": 0,

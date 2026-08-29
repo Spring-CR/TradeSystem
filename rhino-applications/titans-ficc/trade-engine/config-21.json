@@ -97,7 +97,7 @@
         },
         {
             "ConfigItemName": "StrictCtpy",
-            "ConfigItemValue": "15816,15346,15377"
+            "ConfigItemValue": "15348"
         }
     ],
     "ExtendAttrItems": [
@@ -307,15 +307,10 @@
         {
             "AttrName": "avgDirtyPriceWithFee",
             "AttrValueType": 2
-        },
-        {
-            "AttrName": "groupAccountFlag",
-            "AttrValueType": 1,
-            "AttrValueLen": 64
         }
     ],
     "PositionAttrItems": [
-        {
+	{
             "AttrName": "key",
             "AttrValueType": 0,
             "AttrValueLen": 512,
@@ -518,8 +513,8 @@
             "DisplayTimeZone": "Asia/Shanghai",
             "BeginTime": "09:00:00",
             "EndTime": "17:30:00",
-            "IsDSTSensitive": false,
-            "ConfigDir": "/opt/trade_client/ficc",
+            "IsDSTSensitive": true,
+            "ConfigDir": "/opt/trade_client/cbf",
             "AdapterPath": "rhino-plugins/channel_plugin/ficc",
             "TradeChannelCfgItems": [
                 {

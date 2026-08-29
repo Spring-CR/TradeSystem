@@ -18,9 +18,6 @@ import (
 
 func (a *OrderArchiver) copyDailyTableStructure(originalTableName string, archivingLog *schema.DataArchivingLog) (string, error) {
 	targetTableName := fmt.Sprintf(originalTableName+"_%s_%s_%s", archivingLog.SystemCode, archivingLog.BusinessCode, archivingLog.ArchivingDate)
-	if archivingLog.TaskName != "" {
-		targetTableName = fmt.Sprintf(originalTableName+"_%s_%s_%s_%s", archivingLog.SystemCode, archivingLog.BusinessCode, archivingLog.TaskName, archivingLog.ArchivingDate)
-	}
 	return targetTableName, dbutil.CopyTableStructure(a.applicationCfg.GetAppDB(), a.applicationCfg.GetCentralDB(), originalTableName, targetTableName, true)
 }
 
@@ -58,10 +55,6 @@ func (a *OrderArchiver) createDailyTables(archivingLog *schema.DataArchivingLog)
 	// 创建TradeOrder扩展表
 	tableNameTmpl := "trade_orders_extend_%s_%s_%s"
 	extendDailyTradeOrderTableName = fmt.Sprintf(tableNameTmpl, archivingLog.SystemCode, archivingLog.BusinessCode, archivingLog.ArchivingDate)
-	if archivingLog.TaskName != "" {
-		tableNameTmpl := "trade_orders_extend_%s_%s_%s_%s"
-		extendDailyTradeOrderTableName = fmt.Sprintf(tableNameTmpl, archivingLog.SystemCode, archivingLog.BusinessCode, archivingLog.TaskName, archivingLog.ArchivingDate)
-	}
 	err = dbutil.CreateSimpleTableWithSysID(a.applicationCfg.GetCentralDB(), extendDailyTradeOrderTableName, true)
 	if err != nil {
 		domain_error.ProcessSevereError(false, 0, nil, err, "error occurs in OrderArchiver::createDailyTables")
@@ -80,10 +73,6 @@ func (a *OrderArchiver) createDailyTables(archivingLog *schema.DataArchivingLog)
 	// 创建TradeActionResp扩展表
 	tableNameTmpl = "trade_action_resps_extend_%s_%s_%s"
 	extendDailyTradeActionRespTableName = fmt.Sprintf(tableNameTmpl, archivingLog.SystemCode, archivingLog.BusinessCode, archivingLog.ArchivingDate)
-	if archivingLog.TaskName != "" {
-		tableNameTmpl = "trade_action_resps_extend_%s_%s_%s_%s"
-		extendDailyTradeActionRespTableName = fmt.Sprintf(tableNameTmpl, archivingLog.SystemCode, archivingLog.BusinessCode, archivingLog.TaskName, archivingLog.ArchivingDate)
-	}
 	err = dbutil.CreateSimpleTableWithSysID(a.applicationCfg.GetCentralDB(), extendDailyTradeActionRespTableName, true)
 	if err != nil {
 		domain_error.ProcessSevereError(false, 0, nil, err, "error occurs in OrderArchiver::createDailyTables")
@@ -143,7 +132,7 @@ func (a *OrderArchiver) getInsertSqlTemplate(tableName string, withID bool, exte
 	return sqlBuf.String()
 }
 
-func (a *OrderArchiver) getInsertExtendTradeOrderArgs(order *schema.TradeOrder, withID bool, clOrdID string, archivingLog *schema.DataArchivingLog) (args []interface{}, err error) {
+func (a *OrderArchiver) getInsertExtendTradeOrderArgs(order *schema.TradeOrder, withID bool, clOrdID string, archivingDate ...string) (args []interface{}, err error) {
 
 	if clOrdID == "" {
 		clOrdID = order.ClOrdID
@@ -197,16 +186,16 @@ func (a *OrderArchiver) getInsertExtendTradeOrderArgs(order *schema.TradeOrder, 
 	// args = append(args, order.OrdDraftDelUser)
 	// args = append(args, order.OrdExecUser)
 
-	if archivingLog !=nil {
-		args = append(args, archivingLog.ArchivingDate, archivingLog.TaskName)
+	if len(archivingDate) > 0 {
+		args = append(args, archivingDate[0])
 	}
 
 	return
 }
 
-func (a *OrderArchiver) getInsertExtendTradeActionRespArgs(order *schema.TradeOrder, tradeActionResp *schema.TradeActionResp, withID bool, archivingLog *schema.DataArchivingLog) (args []interface{}, err error) {
+func (a *OrderArchiver) getInsertExtendTradeActionRespArgs(order *schema.TradeOrder, tradeActionResp *schema.TradeActionResp, withID bool, archivingDate ...string) (args []interface{}, err error) {
 
-	args, err = a.getInsertExtendTradeOrderArgs(order, withID, tradeActionResp.ClOrdID, nil)
+	args, err = a.getInsertExtendTradeOrderArgs(order, withID, tradeActionResp.ClOrdID)
 	if err != nil {
 		return
 	}
@@ -232,8 +221,8 @@ func (a *OrderArchiver) getInsertExtendTradeActionRespArgs(order *schema.TradeOr
 		args = append(args, val)
 	}
 
-	if archivingLog !=nil {
-		args = append(args, archivingLog.ArchivingDate, archivingLog.TaskName)
+	if len(archivingDate) > 0 {
+		args = append(args, archivingDate[0])
 	}
 
 	return
@@ -477,16 +466,12 @@ func (a *OrderArchiver) createHistoricalTables(archivingLog *schema.DataArchivin
 		return
 	}
 
-	// 历史表增加两个个字段：f_archive_date、f_task_name
+	// 历史表增加一个字段：f_archive_date
 	extendAttrItems = []*schema.ExtendAttrItem{{
 		AttrName:      "f_archiving_date",
 		AttrValueType: int(enum.AttrValueType_STRING),
 		AttrValueLen:  8,
 		Index:         true,
-	}, {
-		AttrName:      "f_task_name",
-		AttrValueType: int(enum.AttrValueType_STRING),
-		AttrValueLen:  32,
 	}}
 	tables := []string{
 		historicalGroupTradeOrderTableName,

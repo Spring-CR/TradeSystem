@@ -8,9 +8,9 @@ import (
 )
 
 // 第5步：重置内存模型
-func (a *OrderPurger) resetMem(tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, purgingLog *schema.DataPurgingLog) (err error) {
-
-	a.orderCache.ResetForMaster(tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, tradeOrdersToArchive, tradeActionLatestRespsToArchive, tradeActionRespsToArchive, purgingLog)
+func (a*OrderPurger)resetMem(tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, purgingLog *schema.DataPurgingLog) (err error){
+	
+	a.orderCache.ResetForMaster(tradeOrdersToArchive, tradeActionLatestRespsToArchive)
 
 	purgingLog.CompletePhase = int(enum.DataPurgingLogPhase_ResetMem)
 	err = admin_store.UpdateDataPurgingLogById(a.applicationCfg.GetCentralDB(), purgingLog)

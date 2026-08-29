@@ -67,9 +67,8 @@ func NewTradeChannelCfg(applicationCfg *ApplicationCfg, tradeChannelDetails *Tra
 	case enum.ChannelProtocolType_FIX44:
 		cfg.tradeChannelCfgAdapter = newTradeChannelCfgAdapterForFixInitiator(tradeChannelDetails.TradeChannel, tradeChannelDetails.TradeChannelCfgItems)
 	case enum.ChannelProtocolType_STARS:
-	case enum.ChannelProtocolType_KAFKA:
 	default:
-		de = domain_error.Build(domain_error.UNKNOW_CHANNEL_PROTOCOL_TYPE_ERR_CODE, nil, cfg.tradeChannel.ChannelProtocolType)
+		de = domain_error.Build(domain_error.UNKNOW_CHANNEL_PROTOCOL_TYPE_ERR_CODE, nil)
 		return
 	}
 

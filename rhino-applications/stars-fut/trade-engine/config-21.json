@@ -5,7 +5,7 @@
     "DataArchiveCnLatestTime": "07:50:00",
     "IsDSTSensitive": false,
     "CentralDatabaseUrl": "rhino_test_central:db10ZTE@tcp(10.129.68.201:8882)/rhino_test_central?loadbalance=true&charset=utf8&blacklist=0",
-    "DatabaseUrl": "rhino_test_stars_fut:GFzq_RhInoTest@2026@tcp(10.129.68.201:8882)/rhino_test_stars_fut?loadbalance=true&charset=utf8&blacklist=0",
+    "DatabaseUrl": "root:guangfa4cool@tcp(10.51.136.72:56322)/rhino_test_ficc_fut?charset=utf8",
     "ApiAdapterPath": "rhino-plugins/api_plugin/stars_fut",
     "OrdStatusAdapterPath": "",
     "KafkaBrokers": "10.51.136.72:9093",
@@ -82,9 +82,9 @@
             "DisplayTimeZone": "Asia/Shanghai",
             "BeginTime": "08:00:00",
             "EndTime": "05:00:00",
-            "IsDSTSensitive": false,
+            "IsDSTSensitive": true,
             "ConfigDir": "/opt/trade_client/hkfut",
-            "AdapterPath": "rhino-plugins/channel_plugin/hk_fut",
+            "AdapterPath": "rhino-plugins/channel_plugin/stars_fut",
             "TradeChannelCfgItems": [
                 {
                     "ConfigItemName": "BeginString",

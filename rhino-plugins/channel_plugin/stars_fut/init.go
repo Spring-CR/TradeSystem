@@ -5,5 +5,5 @@ import "rhino-core/adapter_registry"
 // 作者：林春泉
 
 func init() {
-    adapter_registry.RegisterAdapterFunction(NewStarsFutChannel)
+    adapter_registry.RegisterAdapterFunction(NewHKFutFIXChannel)
 }

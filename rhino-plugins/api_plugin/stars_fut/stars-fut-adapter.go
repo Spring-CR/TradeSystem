@@ -186,7 +186,6 @@ func (a *StarFurAPIAdapter) ConvertNewOrderSingleMessage(rawMsg []byte, msgProps
 		HandlInst:          handlInst,
 		Symbol:             symbol,
 		SecurityExchange:   securityExchange,
-		SecurityType:       "FUT",
 		Side:               side,
 		TransactTime:       transactTime,
 		OrderQty:           orderQty,

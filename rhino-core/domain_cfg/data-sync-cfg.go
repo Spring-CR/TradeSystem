@@ -11,7 +11,6 @@ import (
 type DataSyncConfig struct {
 	systemCode          string
 	businessCode        string
-	mrkBeginTime        string
 	mrkCloseTime        string
 	mrkCloseTimeZone    string
 	dataSyncAdapterPath string
@@ -23,13 +22,12 @@ type DataSyncConfig struct {
 	appDB               *sql.DB
 }
 
-func NewDataSyncConfig(systemCode string, businessCode string, centralDatabaseUrl string, appDatabaseUrl string, tableConfigs []*dbutil.TableConfig, mrkBeginTime, mrkCloseTime string, mrkCloseTimeZone string, dataSyncAdapterPath string, tradeDateServiceUrl string, tradeDateServiceAID string, tradeDateServiceSec string) *DataSyncConfig {
+func NewDataSyncConfig(systemCode string, businessCode string, centralDatabaseUrl string, appDatabaseUrl string, tableConfigs []*dbutil.TableConfig, mrkCloseTime string, mrkCloseTimeZone string, dataSyncAdapterPath string, tradeDateServiceUrl string, tradeDateServiceAID string, tradeDateServiceSec string) *DataSyncConfig {
 
 	c := &DataSyncConfig{
 		systemCode:          systemCode,
 		businessCode:        businessCode,
 		tableConfigs:        tableConfigs,
-		mrkBeginTime:        mrkBeginTime,
 		mrkCloseTime:        mrkCloseTime,
 		mrkCloseTimeZone:    mrkCloseTimeZone,
 		dataSyncAdapterPath: dataSyncAdapterPath,
@@ -83,11 +81,6 @@ func (c *DataSyncConfig) GetMrkCloseTime() (mrkCloseTime string, mrkCloseTimeZon
 	}
 	return c.mrkCloseTime, c.mrkCloseTimeZone
 }
-
-func (c *DataSyncConfig) GetMrkBeginTime() (mrkBeginTime string) {
-	return c.mrkBeginTime
-}
-
 
 func (c *DataSyncConfig) GetDataSyncAdapterPath() string {
 	return c.dataSyncAdapterPath

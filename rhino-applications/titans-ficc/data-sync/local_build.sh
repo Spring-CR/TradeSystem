@@ -1,8 +1,8 @@
 #!/bin/bash
 
 BASE_VERSION=20251010  # 基础版本
-PLUG_VERSION=1.0.6.9   # 插件版本
-IS_PROD=0              # 1 表示 true，即生产环境；0 表示 false，即测试环境
+PLUG_VERSION=1.0.6.7   # 插件版本
+IS_PROD=1              # 1 表示 true，即生产环境；0 表示 false，即测试环境
 
 COMPONENT=data-sync-titans-ficc
 

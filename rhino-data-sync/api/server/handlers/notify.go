@@ -4,8 +4,6 @@ import (
 	"rhino-common/domain_error"
 	"rhino-common/enum"
 	"rhino-common/server/middleware"
-	"rhino-common/utils/bean"
-	"rhino-common/utils/dbutil"
 	"rhino-common/utils/request"
 	"rhino-common/utils/timeutil"
 	"rhino-core/domain_cfg"
@@ -95,11 +93,6 @@ func (h *DataSyncNotifyHandler) Notify(c *gin.Context) {
 	middleware.ResponseJson(c, dsl)
 }
 
-type  DataSyncLogWrapper struct {
-	*schema.DataSyncLog
-	RecordCount int64
-}
-
 func (h *DataSyncNotifyHandler) GetSyncLog(c *gin.Context) {
 	id, de := request.GetQueryAsInt(c, api_const.ParamID, false)
 	if middleware.ProcessDomainError(de, c) {
@@ -118,13 +111,5 @@ func (h *DataSyncNotifyHandler) GetSyncLog(c *gin.Context) {
 			return
 		}
 	}
-
-	dataSyncLogWrapper := &DataSyncLogWrapper{
-		DataSyncLog: &schema.DataSyncLog{},
-	}
-	bean.Copy(syncLog).To(dataSyncLogWrapper)
-
-	dataSyncLogWrapper.RecordCount, _ = dbutil.GetRecordCount(h.dataSyncCfg.GetAppDB(), syncLog.TableName)
-
-	middleware.ResponseJson(c, dataSyncLogWrapper)
+	middleware.ResponseJson(c, syncLog)
 }

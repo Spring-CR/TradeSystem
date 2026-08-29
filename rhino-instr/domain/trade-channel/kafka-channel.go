@@ -12,10 +12,10 @@ import (
 	"rhino-instr/store"
 	"time"
 
-	"github.com/IBM/sarama"
+	"github.com/Shopify/sarama"
 )
 
-var (
+var(
 	DefaultTradeChannel *KafkaTradeChannel
 )
 
@@ -116,7 +116,7 @@ func (c *KafkaTradeChannel) initConsumer() *domain_error.Error {
 	config.Consumer.Retry.Backoff = 2 * time.Second
 	config.Consumer.Group.Session.Timeout = 10 * time.Second
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest // 因consumer.ConsumePartition已经设置了偏移量，这里可以省略
-	config.Consumer.Offsets.AutoCommit.Enable = false     // 禁用自动提交
+	config.Consumer.Offsets.AutoCommit.Enable = false // 禁用自动提交
 	//config.Consumer.Offsets.CommitInterval = 0  // 禁用自动提交
 
 	client, err := sarama.NewClient(c.brokers, config)
@@ -127,21 +127,21 @@ func (c *KafkaTradeChannel) initConsumer() *domain_error.Error {
 	// 获取当前的start和end偏移量
 	// 获取起始偏移量
 	partition := int32(0)
-	startOffset, err := client.GetOffset(c.tradeRespTopic, partition, sarama.OffsetOldest)
-	if err != nil {
-		return domain_error.Build(domain_error.KAFKA_ERR_CODE, err)
-	}
-	// 获取结束偏移量
-	endOffset, err := client.GetOffset(c.tradeRespTopic, partition, sarama.OffsetNewest)
-	if err != nil {
-		return domain_error.Build(domain_error.KAFKA_ERR_CODE, err)
-	}
+    startOffset, err := client.GetOffset(c.tradeRespTopic, partition, sarama.OffsetOldest)
+    if err != nil {
+        return domain_error.Build(domain_error.KAFKA_ERR_CODE, err)
+    }
+    // 获取结束偏移量
+    endOffset, err := client.GetOffset(c.tradeRespTopic, partition, sarama.OffsetNewest)
+    if err != nil {
+        return domain_error.Build(domain_error.KAFKA_ERR_CODE, err)
+    }
 
 	log.Printf("maxOffset:%d, startOffset:%d, endOffset:%d\n", maxOffset, startOffset, endOffset)
-	if maxOffset+1 > endOffset {
+	if maxOffset + 1 > endOffset {
 		maxOffset = endOffset - 1
 		log.Printf("reset1 maxOffset=%d\n", maxOffset)
-	} else if maxOffset+1 < startOffset {
+	} else if maxOffset + 1 < startOffset {
 		maxOffset = startOffset - 1
 		log.Printf("reset2 maxOffset=%d\n", maxOffset)
 	}
@@ -154,20 +154,20 @@ func (c *KafkaTradeChannel) initConsumer() *domain_error.Error {
 	log.Printf("c.tradeRespTopic:%s, maxOffset:%d\n", c.tradeRespTopic, maxOffset)
 
 	if maxOffset == 0 {
-		partitionConsumer, err := consumer.ConsumePartition(c.tradeRespTopic, 0, sarama.OffsetOldest)
-		if err != nil {
-			return domain_error.Build(domain_error.CANNOT_CREATE_CONSUMER_ERR_CODE, err)
-		}
-		log.Println("ConsumePartition from the oldest offset...")
-		c.consumer = partitionConsumer
-	} else {
-		partitionConsumer, err := consumer.ConsumePartition(c.tradeRespTopic, 0, maxOffset+1)
-		if err != nil {
-			return domain_error.Build(domain_error.CANNOT_CREATE_CONSUMER_ERR_CODE, err)
-		}
-		log.Println("ConsumePartition from the specified offset...")
-		c.consumer = partitionConsumer
-	}
+        partitionConsumer, err := consumer.ConsumePartition(c.tradeRespTopic, 0, sarama.OffsetOldest)
+        if err != nil {
+            return domain_error.Build(domain_error.CANNOT_CREATE_CONSUMER_ERR_CODE, err)
+        }
+        log.Println("ConsumePartition from the oldest offset...")
+        c.consumer = partitionConsumer
+    } else {
+        partitionConsumer, err := consumer.ConsumePartition(c.tradeRespTopic, 0, maxOffset+1)
+        if err != nil {
+            return domain_error.Build(domain_error.CANNOT_CREATE_CONSUMER_ERR_CODE, err)
+        }
+        log.Println("ConsumePartition from the specified offset...")
+        c.consumer = partitionConsumer
+    }
 
 	return nil
 }
@@ -197,11 +197,11 @@ func (c *KafkaTradeChannel) KeepListening(onReceived func(m *sarama.ConsumerMess
 						processed = true
 						break
 					}
-					time.Sleep(time.Duration(context.RetryIntervalSeconds) * time.Second)
+					time.Sleep( time.Duration(context.RetryIntervalSeconds) * time.Second)
 				}
 				if !processed {
-					log.Printf("Failed to process message after %d retries, offset: %d\n", context.RetryIntervalTimes, msg.Offset)
-				}
+                    log.Printf("Failed to process message after %d retries, offset: %d\n", context.RetryIntervalTimes, msg.Offset)
+                }
 			case err := <-c.consumer.Errors():
 				log.Printf("Consumer error: %s", err)
 			}

@@ -5,7 +5,7 @@ type GroupTradeOrder struct {
 	SystemCode          string `sql:"size: 32"`
 	BusinessCode        string `sql:"size: 32"`
 	ClGroupOrdID        string `sql:"unique: pk_gto_clid, size: 128"`
-	SecurityType        string `sql:"size: 16"`
+	SecurityType        string `sql:"size: 2"`
 	SubOrderDeriveType  string `sql:"size: 2"`
 	TransactTime        int64
 	OrdStatus           string `sql:"size: 2"`

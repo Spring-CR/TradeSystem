@@ -63,7 +63,7 @@ func (s *MsgSeqGen) setMsgSeqNum() (de *domain_error.Error) {
 					return
 				}
 			default:
-				de = domain_error.Build(domain_error.UNKNOW_CHANNEL_PROTOCOL_TYPE_ERR_CODE, nil, s.cfg.tradeChannel.ChannelProtocolType)
+				de = domain_error.Build(domain_error.UNKNOW_CHANNEL_PROTOCOL_TYPE_ERR_CODE, nil)
 				return
 			}
 		}

@@ -64,16 +64,8 @@ func (a *TitansFiccDataSyncAdapter) RefineCsvContent(tableConfig *dbutil.TableCo
 	// 按 keyCtptyId、keyPlanId、keyInstrumentId、longShort 分组
 	lineAggregateMap := make(map[string][]map[string]interface{})
 	// 聚合
-	cyptGroupMap, err := GetCyptGroupMap(a.dataSyncConfig.GetAppDB())
-	if err != nil {
-		return rawCsv, err1
-	}
-	cyptPlanMap, err := GetPlanInfoMap(a.dataSyncConfig.GetAppDB())
-	if err != nil {
-		return rawCsv, err1
-	}
 	for _, line := range lines {
-		key, ok := getKeyOfLine(line, cyptGroupMap, cyptPlanMap)
+		key, ok := getKeyOfLine(line)
 		if !ok {
 			continue
 		}
@@ -194,7 +186,7 @@ func initBasePosition(referData map[string]interface{}, parValueMap map[string]*
 		errStr := fmt.Sprintf("no parValue found for %v, use 100", v["windCode"])
 		domain_error.ProcessSevereError(false, 0, nil, errors.New(errStr), errStr)
 		secRecord = &SecRecord{
-			ParValue:     100,
+			ParValue: 100,
 			SecurityType: "BOND",
 		}
 	}
@@ -209,30 +201,15 @@ func initBasePosition(referData map[string]interface{}, parValueMap map[string]*
 	return v
 }
 
-func getKeyOfLine(line map[string]interface{}, cyptGroupMap map[int64]*CyptGroupInfo, cyptPlanMap map[int64]*PlanInfo) (key string, ok bool) {
-
+func getKeyOfLine(line map[string]interface{}) (key string, ok bool) {
 	//按keyCtptyId、keyPlanId、keyInstrumentId、longShort 分组
 	_keyCtptyId, ok := line["keyCtptyId"]
 	if !ok {
 		return "", false
 	}
-
 	keyCtptyId, ok := _keyCtptyId.(int64)
 	if !ok {
 		return "", false
-	}
-
-	if groupInfo, ok := cyptGroupMap[keyCtptyId]; ok {
-
-		line["keyCtptyId"] = groupInfo.GroupID
-		line["ctptyShortName"] = groupInfo.GroupName
-
-		if planInfo, ok := cyptPlanMap[keyCtptyId]; ok {
-			line["keyPlanId"] = planInfo.PlanID
-			line["planCode"] = planInfo.PlanCode
-			line["ultraContractId"] = planInfo.UltraContractID
-			line["ultraContractCode"] = planInfo.UltraContractCode
-		}
 	}
 
 	_keyPlanId, ok := line["keyPlanId"]

@@ -14,7 +14,6 @@ type TradeChannel struct {
 	DisplayTimeZone     string `sql:"size: 8"`
 	BeginTime           string `sql:"size: 8"`
 	EndTime             string `sql:"size: 8"`
-	DataNumAdj          int
 	ActiveRealAddress   string `sql:"size: 64"`
 	RealAddress         string `sql:"size: 64"`
 	ExportAddress       string `sql:"size: 64"`

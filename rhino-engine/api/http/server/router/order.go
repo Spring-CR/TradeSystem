@@ -24,8 +24,7 @@ func setOrderRouter(e *gin.Engine, handler *handlers.OrderHandler) {
 		r.GET(api_const.SubForceArchiving, handler.ForceArchiving)
 		r.GET(api_const.SubForcePurging, handler.ForcePurging)
 		r.GET(api_const.SubDump, handler.Dump)
-		r.GET(api_const.SubRoutePositions, handler.Positions)
-		r.POST(api_const.SubRoutePositions+"/"+api_const.SubRoutePositionAdj, handler.AdjustPosition)
+		r.GET(api_const.Positions, handler.Positions)
 		r.POST(api_const.SubRouteUpdateOrderAttribute, handler.UpdateOrderAttribute)
 	}
 }

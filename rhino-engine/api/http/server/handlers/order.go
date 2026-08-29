@@ -142,15 +142,6 @@ func (h *OrderHandler) SubmitOrderForReview(c *gin.Context) {
 		return
 	}
 
-	// 额度检查
-	pm := h.engine.GetOrderOrchestrator().GetPositionManager()
-	if pm != nil && pm.GetQuotaNotEnoughHandler() != nil {
-		sufficient, de := pm.HasSufficientQuota(order)
-		if de != nil && !sufficient {
-			pm.GetQuotaNotEnoughHandler()(order, de)
-		}
-	}
-
 	// 转json文本
 	if len(order.ExtendAttrMap) > 0 && len(order.ExtendAttr) == 0 {
 		data, _ := json.Marshal(order.ExtendAttrMap)

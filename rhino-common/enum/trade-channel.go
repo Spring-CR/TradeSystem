@@ -18,7 +18,6 @@ const (
 	ChannelProtocolType_FIX42   ChannelProtocolType = "FIX42"
 	ChannelProtocolType_FIX44   ChannelProtocolType = "FIX44"
 	ChannelProtocolType_STARS   ChannelProtocolType = "stars"
-	ChannelProtocolType_KAFKA   ChannelProtocolType = "kafka"
 )
 
 // 交易通道的状态

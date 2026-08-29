@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 )
 
-func (c *OrderCache) ResetForMaster(tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, purgingLog *schema.DataPurgingLog) {
+func (c *OrderCache) ResetForMaster(tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp) {
 	log.Printf("ResetForMaster...")
 	appOrdIDMap := make(map[string]bool)
 	clOrdIDMap := make(map[string]bool)
@@ -92,118 +92,70 @@ func (c *OrderCache) ResetForMaster(tradeOrdersToKeep []*schema.TradeOrder, trad
 
 	if c.IsMaster() {
 		// 发送reset同步消息
-		jsData, _ := newResetMessage(appOrdIDMap, clOrdIDMap, composeOrdIDMap, actionKeyMap, tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, tradeOrdersToArchive, tradeActionLatestRespsToArchive, tradeActionRespsToArchive, purgingLog)
+		jsData, _ := newResetMessage()
 		c.producer.SendMessage(jsData)
 
 		if c._afterReset != nil {
 			log.Println("invoke function after OrderCache reset")
-			c._afterReset(tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, tradeOrdersToArchive, tradeActionLatestRespsToArchive, tradeActionRespsToArchive, purgingLog)
+			c._afterReset()
 		}
 	}
 }
 
-func (c *OrderCache) reset(appOrdIDMap, clOrdIDMap, composeOrdIDMap, actionKeyMap map[string]bool, tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, purgingLog *schema.DataPurgingLog) {
+func (c *OrderCache) reset() {
 
 	log.Println("start to reset OrderCache state")
-	/*
-		for i, rootOrder := range c.rootOrders {
-			if rootOrder != nil {
-				rootOrder.Dispose()
-			}
-			c.rootOrders[i] = nil
-		}
-		c.rootOrders = nil
 
-		for k, v := range c.directOrderMap {
-			if v != nil {
-				v.Dispose()
-			}
-			delete(c.directOrderMap, k)
-		}
-
-		for k, v := range c.tradeActionRespMap {
-			if v != nil {
-				v.Dispose()
-			}
-			delete(c.tradeActionRespMap, k)
-		}
-
-		if c.tradeActionLatestRespKeyMap != nil {
-			for k := range c.tradeActionLatestRespKeyMap {
-				delete(c.tradeActionLatestRespKeyMap, k)
-			}
-		}
-
-		if c.rootOrderKeyMap != nil {
-			for k := range c.rootOrderKeyMap {
-				delete(c.rootOrderKeyMap, k)
-			}
-		}
-	*/
-	var newRootOrders []*types.TraceableTradeOrder
 	for i, rootOrder := range c.rootOrders {
-		if rootOrder != nil && !appOrdIDMap[rootOrder.GetBasicInfo().AppOrdID] && !clOrdIDMap[rootOrder.GetBasicInfo().ClOrdID] {
-			newRootOrders = append(newRootOrders, rootOrder)
-		} else {
-			if rootOrder != nil {
-				rootOrder.Dispose()
-			}
-			c.rootOrders[i] = nil
+		if rootOrder != nil {
+			rootOrder.Dispose()
 		}
+		c.rootOrders[i] = nil
 	}
-	c.rootOrders = newRootOrders
+	c.rootOrders = nil
 
 	for k, v := range c.directOrderMap {
-		if appOrdIDMap[k] {
-			if v != nil {
-				v.Dispose()
-			}
-			delete(c.directOrderMap, k)
+		if v != nil {
+			v.Dispose()
 		}
+		delete(c.directOrderMap, k)
 	}
 
 	for k, v := range c.tradeActionRespMap {
-		if clOrdIDMap[k] {
-			if v != nil {
-				v.Dispose()
-			}
-			delete(c.tradeActionRespMap, k)
+		if v != nil {
+			v.Dispose()
 		}
+		delete(c.tradeActionRespMap, k)
 	}
 
 	if c.tradeActionLatestRespKeyMap != nil {
 		for k := range c.tradeActionLatestRespKeyMap {
-			if actionKeyMap[k] {
-				delete(c.tradeActionLatestRespKeyMap, k)
-			}
+			delete(c.tradeActionLatestRespKeyMap, k)
 		}
 	}
 
 	if c.rootOrderKeyMap != nil {
 		for k := range c.rootOrderKeyMap {
-			if composeOrdIDMap[k] {
-				delete(c.rootOrderKeyMap, k)
-			}
+			delete(c.rootOrderKeyMap, k)
 		}
 	}
 
 	// 手动触发 GC 并输出内存状态
 	debug.FreeOSMemory()
-	// Todo: 20260803之后，这里不调用recover函数了，要重点看看有没有其他问题
-	if len(newRootOrders) == 0 {
-		if c.IsSlave() {
-			c.recoverForSlave()
-		} else {
-			c.strictRecover()
-		}
+
+	if c.IsSlave() {
+		c.recoverForSlave()
+	} else {
+		c.strictRecover()
 	}
 
 	if c._afterReset != nil {
 		log.Println("invoke function after OrderCache reset")
-		c._afterReset(tradeOrdersToKeep, tradeActionLatestRespsToKeep, tradeActionRespsToKeep, tradeOrdersToArchive, tradeActionLatestRespsToArchive, tradeActionRespsToArchive, purgingLog)
+		c._afterReset()
 	}
 }
 
-func (c *OrderCache) SetAfterResetFunc(_afterReset func(tradeOrdersToKeep []*schema.TradeOrder, tradeActionLatestRespsToKeep []*schema.TradeActionLatestResp, tradeActionRespsToKeep []*schema.TradeActionResp, tradeOrdersToArchive []*schema.TradeOrder, tradeActionLatestRespsToArchive []*schema.TradeActionLatestResp, tradeActionRespsToArchive []*schema.TradeActionResp, purgingLog *schema.DataPurgingLog)) {
+
+func (c *OrderCache) SetAfterResetFunc(_afterReset func()) {
 	c._afterReset = _afterReset
 }

@@ -5,7 +5,6 @@ type DataPurgingLog struct {
 	SystemCode                   string `sql:"unique: pk_dcl, size: 32"`
 	BusinessCode                 string `sql:"index: pk_dcl, size: 32"`
 	PurgingDate                  string `sql:"index: pk_dcl, size: 8"`
-	TaskName                     string `sql:"index: pk_dcl, size: 32"`
 	GroupTradeOrderPurging       string `sql:"type: LONGTEXT"`
 	TradeOrderPurging            string `sql:"type: LONGTEXT"`
 	TradeActionLatestRespPurging string `sql:"type: LONGTEXT"`

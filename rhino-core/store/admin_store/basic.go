@@ -8,154 +8,146 @@ import (
 	"rhino-core/schema"
 )
 
-const CreateApplicationArchivingCfgItemStmt = `
-CREATE TABLE IF NOT EXISTS application_archiving_cfg_items (
- f_id                          BIGINT PRIMARY KEY AUTO_INCREMENT
-,f_system_code                 VARCHAR(32)
-,f_business_code               VARCHAR(32)
-,f_task_name                   VARCHAR(32)
-,f_match_channels              VARCHAR(512)
-,f_data_archive_cn_begin_time  VARCHAR(64)
-,f_data_archive_cn_latest_time VARCHAR(64)
-,f_is_dst_sensitive            BOOLEAN
-,f_is_last                     BOOLEAN
+const CreateApplicationCfgItemStmt = `
+CREATE TABLE IF NOT EXISTS application_cfg_items (
+ f_id                        BIGINT PRIMARY KEY AUTO_INCREMENT
+,f_system_code               VARCHAR(32)
+,f_business_code             VARCHAR(32)
+,f_config_item_name          VARCHAR(32)
+,f_config_item_value         VARCHAR(512)
+,f_config_item_default_value VARCHAR(512)
+,f_description               VARCHAR(512)
+,f_required                  INTEGER
 );
 `
 
-const InsertApplicationArchivingCfgItemStmt = `
-INSERT INTO application_archiving_cfg_items (
+const InsertApplicationCfgItemStmt = `
+INSERT INTO application_cfg_items (
  f_system_code
 ,f_business_code
-,f_task_name
-,f_match_channels
-,f_data_archive_cn_begin_time
-,f_data_archive_cn_latest_time
-,f_is_dst_sensitive
-,f_is_last
-) VALUES (?,?,?,?,?,?,?,?)
+,f_config_item_name
+,f_config_item_value
+,f_config_item_default_value
+,f_description
+,f_required
+) VALUES (?,?,?,?,?,?,?)
 `
 
-const SelectApplicationArchivingCfgItemStmt = `
+const SelectApplicationCfgItemStmt = `
 SELECT 
  f_id
 ,f_system_code
 ,f_business_code
-,f_task_name
-,f_match_channels
-,f_data_archive_cn_begin_time
-,f_data_archive_cn_latest_time
-,f_is_dst_sensitive
-,f_is_last
-FROM application_archiving_cfg_items 
+,f_config_item_name
+,f_config_item_value
+,f_config_item_default_value
+,f_description
+,f_required
+FROM application_cfg_items 
 `
 
-const SelectApplicationArchivingCfgItemRangeStmt = `
+const SelectApplicationCfgItemRangeStmt = `
 SELECT 
  f_id
 ,f_system_code
 ,f_business_code
-,f_task_name
-,f_match_channels
-,f_data_archive_cn_begin_time
-,f_data_archive_cn_latest_time
-,f_is_dst_sensitive
-,f_is_last
-FROM application_archiving_cfg_items 
+,f_config_item_name
+,f_config_item_value
+,f_config_item_default_value
+,f_description
+,f_required
+FROM application_cfg_items 
 LIMIT ? OFFSET ?
 `
 
-const SelectApplicationArchivingCfgItemCountStmt = `
+const SelectApplicationCfgItemCountStmt = `
 SELECT count(1)
-FROM application_archiving_cfg_items 
+FROM application_cfg_items 
 `
 
-const SelectApplicationArchivingCfgItemByIdStmt = `
+const SelectApplicationCfgItemByIdStmt = `
 SELECT 
  f_id
 ,f_system_code
 ,f_business_code
-,f_task_name
-,f_match_channels
-,f_data_archive_cn_begin_time
-,f_data_archive_cn_latest_time
-,f_is_dst_sensitive
-,f_is_last
-FROM application_archiving_cfg_items 
+,f_config_item_name
+,f_config_item_value
+,f_config_item_default_value
+,f_description
+,f_required
+FROM application_cfg_items 
 WHERE f_id=?
 `
 
-const UpdateApplicationArchivingCfgItemByIdStmt = `
-UPDATE application_archiving_cfg_items SET 
+const UpdateApplicationCfgItemByIdStmt = `
+UPDATE application_cfg_items SET 
  f_id=?
 ,f_system_code=?
 ,f_business_code=?
-,f_task_name=?
-,f_match_channels=?
-,f_data_archive_cn_begin_time=?
-,f_data_archive_cn_latest_time=?
-,f_is_dst_sensitive=?
-,f_is_last=? 
+,f_config_item_name=?
+,f_config_item_value=?
+,f_config_item_default_value=?
+,f_description=?
+,f_required=? 
 WHERE f_id=?
 `
 
-const DeleteApplicationArchivingCfgItemByIdStmt = `
-DELETE FROM application_archiving_cfg_items 
+const DeleteApplicationCfgItemByIdStmt = `
+DELETE FROM application_cfg_items 
 WHERE f_id=?
 `
 
-const CreatePkAaciStmt = `
-CREATE UNIQUE INDEX pk_aaci ON application_archiving_cfg_items (f_system_code,f_business_code,f_task_name);
+const CreatePkAciStmt = `
+CREATE UNIQUE INDEX pk_aci ON application_cfg_items (f_system_code,f_business_code,f_config_item_name);
 `
 
-const SelectApplicationArchivingCfgItemBySystemCodeAndBusinessCodeAndTaskNameStmt = `
+const SelectApplicationCfgItemBySystemCodeAndBusinessCodeAndConfigItemNameStmt = `
 SELECT 
  f_id
 ,f_system_code
 ,f_business_code
-,f_task_name
-,f_match_channels
-,f_data_archive_cn_begin_time
-,f_data_archive_cn_latest_time
-,f_is_dst_sensitive
-,f_is_last
-FROM application_archiving_cfg_items 
+,f_config_item_name
+,f_config_item_value
+,f_config_item_default_value
+,f_description
+,f_required
+FROM application_cfg_items 
 WHERE f_system_code=?
 AND f_business_code=?
-AND f_task_name=?
+AND f_config_item_name=?
 `
 
-const SelectApplicationArchivingCfgItemCountBySystemCodeAndBusinessCodeAndTaskNameStmt = `
+const SelectApplicationCfgItemCountBySystemCodeAndBusinessCodeAndConfigItemNameStmt = `
 SELECT count(1)
-FROM application_archiving_cfg_items 
+FROM application_cfg_items 
 WHERE f_system_code=?
 AND f_business_code=?
-AND f_task_name=?
+AND f_config_item_name=?
 `
 
-const UpdateApplicationArchivingCfgItemBySystemCodeAndBusinessCodeAndTaskNameStmt = `
-UPDATE application_archiving_cfg_items SET 
+const UpdateApplicationCfgItemBySystemCodeAndBusinessCodeAndConfigItemNameStmt = `
+UPDATE application_cfg_items SET 
  f_id=?
 ,f_system_code=?
 ,f_business_code=?
-,f_task_name=?
-,f_match_channels=?
-,f_data_archive_cn_begin_time=?
-,f_data_archive_cn_latest_time=?
-,f_is_dst_sensitive=?
-,f_is_last=? 
+,f_config_item_name=?
+,f_config_item_value=?
+,f_config_item_default_value=?
+,f_description=?
+,f_required=? 
 WHERE f_system_code=?
 AND f_business_code=?
-AND f_task_name=?
+AND f_config_item_name=?
 `
 
-const DeleteApplicationArchivingCfgItemBySystemCodeAndBusinessCodeAndTaskNameStmt = `
-DELETE FROM application_archiving_cfg_items 
+const DeleteApplicationCfgItemBySystemCodeAndBusinessCodeAndConfigItemNameStmt = `
+DELETE FROM application_cfg_items 
 WHERE f_system_code=?
 AND f_business_code=?
-AND f_task_name=?
+AND f_config_item_name=?
 `
 
-func scanApplicationArchivingCfgItem(row *sql.Row) (*schema.ApplicationArchivingCfgItem, error) {
+func scanApplicationCfgItem(row *sql.Row) (*schema.ApplicationCfgItem, error) {
 	var v0 sql.NullInt64
 	var v1 sql.NullString
 	var v2 sql.NullString
@@ -163,8 +155,7 @@ func scanApplicationArchivingCfgItem(row *sql.Row) (*schema.ApplicationArchiving
 	var v4 sql.NullString
 	var v5 sql.NullString
 	var v6 sql.NullString
-	var v7 sql.NullBool
-	var v8 sql.NullBool
+	var v7 sql.NullInt64
 
 	err := row.Scan(
 		&v0,
@@ -175,13 +166,12 @@ func scanApplicationArchivingCfgItem(row *sql.Row) (*schema.ApplicationArchiving
 		&v5,
 		&v6,
 		&v7,
-		&v8,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	v := &schema.ApplicationArchivingCfgItem{}
+	v := &schema.ApplicationCfgItem{}
 
 	if v0.Valid {
 		v.ID = v0.Int64
@@ -202,47 +192,41 @@ func scanApplicationArchivingCfgItem(row *sql.Row) (*schema.ApplicationArchiving
 	}
 
 	if v3.Valid {
-		v.TaskName = v3.String
+		v.ConfigItemName = v3.String
 	} else {
-		v.TaskName = ""
+		v.ConfigItemName = ""
 	}
 
 	if v4.Valid {
-		v.MatchChannels = v4.String
+		v.ConfigItemValue = v4.String
 	} else {
-		v.MatchChannels = ""
+		v.ConfigItemValue = ""
 	}
 
 	if v5.Valid {
-		v.DataArchiveCnBeginTime = v5.String
+		v.ConfigItemDefaultValue = v5.String
 	} else {
-		v.DataArchiveCnBeginTime = ""
+		v.ConfigItemDefaultValue = ""
 	}
 
 	if v6.Valid {
-		v.DataArchiveCnLatestTime = v6.String
+		v.Description = v6.String
 	} else {
-		v.DataArchiveCnLatestTime = ""
+		v.Description = ""
 	}
 
 	if v7.Valid {
-		v.IsDSTSensitive = v7.Bool
+		v.Required = int(v7.Int64)
 	} else {
-		v.IsDSTSensitive = false
-	}
-
-	if v8.Valid {
-		v.IsLast = v8.Bool
-	} else {
-		v.IsLast = false
+		v.Required = 0
 	}
 
 	return v, nil
 }
 
-func scanApplicationArchivingCfgItems(rows *sql.Rows) ([]*schema.ApplicationArchivingCfgItem, error) {
+func scanApplicationCfgItems(rows *sql.Rows) ([]*schema.ApplicationCfgItem, error) {
 	var err error
-	var vv []*schema.ApplicationArchivingCfgItem
+	var vv []*schema.ApplicationCfgItem
 
 	var v0 sql.NullInt64
 	var v1 sql.NullString
@@ -251,8 +235,7 @@ func scanApplicationArchivingCfgItems(rows *sql.Rows) ([]*schema.ApplicationArch
 	var v4 sql.NullString
 	var v5 sql.NullString
 	var v6 sql.NullString
-	var v7 sql.NullBool
-	var v8 sql.NullBool
+	var v7 sql.NullInt64
 
 	for rows.Next() {
 		err = rows.Scan(
@@ -264,13 +247,12 @@ func scanApplicationArchivingCfgItems(rows *sql.Rows) ([]*schema.ApplicationArch
 			&v5,
 			&v6,
 			&v7,
-			&v8,
 		)
 		if err != nil {
 			return vv, err
 		}
 
-		v := &schema.ApplicationArchivingCfgItem{}
+		v := &schema.ApplicationCfgItem{}
 
 		if v0.Valid {
 			v.ID = v0.Int64
@@ -291,39 +273,33 @@ func scanApplicationArchivingCfgItems(rows *sql.Rows) ([]*schema.ApplicationArch
 		}
 
 		if v3.Valid {
-			v.TaskName = v3.String
+			v.ConfigItemName = v3.String
 		} else {
-			v.TaskName = ""
+			v.ConfigItemName = ""
 		}
 
 		if v4.Valid {
-			v.MatchChannels = v4.String
+			v.ConfigItemValue = v4.String
 		} else {
-			v.MatchChannels = ""
+			v.ConfigItemValue = ""
 		}
 
 		if v5.Valid {
-			v.DataArchiveCnBeginTime = v5.String
+			v.ConfigItemDefaultValue = v5.String
 		} else {
-			v.DataArchiveCnBeginTime = ""
+			v.ConfigItemDefaultValue = ""
 		}
 
 		if v6.Valid {
-			v.DataArchiveCnLatestTime = v6.String
+			v.Description = v6.String
 		} else {
-			v.DataArchiveCnLatestTime = ""
+			v.Description = ""
 		}
 
 		if v7.Valid {
-			v.IsDSTSensitive = v7.Bool
+			v.Required = int(v7.Int64)
 		} else {
-			v.IsDSTSensitive = false
-		}
-
-		if v8.Valid {
-			v.IsLast = v8.Bool
-		} else {
-			v.IsLast = false
+			v.Required = 0
 		}
 
 		vv = append(vv, v)
@@ -331,7 +307,7 @@ func scanApplicationArchivingCfgItems(rows *sql.Rows) ([]*schema.ApplicationArch
 	return vv, rows.Err()
 }
 
-func sliceApplicationArchivingCfgItem(v *schema.ApplicationArchivingCfgItem) []interface{} {
+func sliceApplicationCfgItem(v *schema.ApplicationCfgItem) []interface{} {
 	var v0 int64
 	var v1 string
 	var v2 string
@@ -339,18 +315,16 @@ func sliceApplicationArchivingCfgItem(v *schema.ApplicationArchivingCfgItem) []i
 	var v4 string
 	var v5 string
 	var v6 string
-	var v7 bool
-	var v8 bool
+	var v7 int
 
 	v0 = v.ID
 	v1 = v.SystemCode
 	v2 = v.BusinessCode
-	v3 = v.TaskName
-	v4 = v.MatchChannels
-	v5 = v.DataArchiveCnBeginTime
-	v6 = v.DataArchiveCnLatestTime
-	v7 = v.IsDSTSensitive
-	v8 = v.IsLast
+	v3 = v.ConfigItemName
+	v4 = v.ConfigItemValue
+	v5 = v.ConfigItemDefaultValue
+	v6 = v.Description
+	v7 = v.Required
 
 	return []interface{}{
 		v0,
@@ -361,27 +335,26 @@ func sliceApplicationArchivingCfgItem(v *schema.ApplicationArchivingCfgItem) []i
 		v5,
 		v6,
 		v7,
-		v8,
 	}
 }
 
-func genericSelectApplicationArchivingCfgItem(db db.SimpleDB, query string, args ...interface{}) (*schema.ApplicationArchivingCfgItem, error) {
+func genericSelectApplicationCfgItem(db db.SimpleDB, query string, args ...interface{}) (*schema.ApplicationCfgItem, error) {
 	row := db.QueryRow(query, args...)
-	return scanApplicationArchivingCfgItem(row)
+	return scanApplicationCfgItem(row)
 }
 
-func genericSelectApplicationArchivingCfgItems(db db.SimpleDB, query string, args ...interface{}) ([]*schema.ApplicationArchivingCfgItem, error) {
+func genericSelectApplicationCfgItems(db db.SimpleDB, query string, args ...interface{}) ([]*schema.ApplicationCfgItem, error) {
 	rows, err := db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	return scanApplicationArchivingCfgItems(rows)
+	return scanApplicationCfgItems(rows)
 }
 
-func InsertApplicationArchivingCfgItem(db db.SimpleDB, v *schema.ApplicationArchivingCfgItem) error {
+func InsertApplicationCfgItem(db db.SimpleDB, v *schema.ApplicationCfgItem) error {
 
-	res, err := db.Exec(InsertApplicationArchivingCfgItemStmt, sliceApplicationArchivingCfgItem(v)[1:]...)
+	res, err := db.Exec(InsertApplicationCfgItemStmt, sliceApplicationCfgItem(v)[1:]...)
 	if err != nil {
 		return err
 	}
@@ -390,67 +363,67 @@ func InsertApplicationArchivingCfgItem(db db.SimpleDB, v *schema.ApplicationArch
 	return err
 }
 
-func DeleteApplicationArchivingCfgItemById(db db.SimpleDB, iD int64) error {
+func DeleteApplicationCfgItemById(db db.SimpleDB, iD int64) error {
 	args := []interface{}{iD}
-	_, err := db.Exec(DeleteApplicationArchivingCfgItemByIdStmt, args...)
+	_, err := db.Exec(DeleteApplicationCfgItemByIdStmt, args...)
 	return err
 }
 
-func DeleteApplicationArchivingCfgItemBySystemCodeAndBusinessCodeAndTaskName(db db.SimpleDB, systemCode string, businessCode string, taskName string) error {
-	args := []interface{}{systemCode, businessCode, taskName}
-	_, err := db.Exec(DeleteApplicationArchivingCfgItemBySystemCodeAndBusinessCodeAndTaskNameStmt, args...)
+func DeleteApplicationCfgItemBySystemCodeAndBusinessCodeAndConfigItemName(db db.SimpleDB, systemCode string, businessCode string, configItemName string) error {
+	args := []interface{}{systemCode, businessCode, configItemName}
+	_, err := db.Exec(DeleteApplicationCfgItemBySystemCodeAndBusinessCodeAndConfigItemNameStmt, args...)
 	return err
 }
 
-func UpdateApplicationArchivingCfgItemById(db db.SimpleDB, v *schema.ApplicationArchivingCfgItem) error {
-	args := sliceApplicationArchivingCfgItem(v)
+func UpdateApplicationCfgItemById(db db.SimpleDB, v *schema.ApplicationCfgItem) error {
+	args := sliceApplicationCfgItem(v)
 	args = append(args, v.ID)
-	_, err := db.Exec(UpdateApplicationArchivingCfgItemByIdStmt, args...)
+	_, err := db.Exec(UpdateApplicationCfgItemByIdStmt, args...)
 	return err
 }
 
-func UpdateApplicationArchivingCfgItemBySystemCodeAndBusinessCodeAndTaskName(db db.SimpleDB, v *schema.ApplicationArchivingCfgItem) error {
-	args := sliceApplicationArchivingCfgItem(v)
-	args = append(args, v.SystemCode, v.BusinessCode, v.TaskName)
-	_, err := db.Exec(UpdateApplicationArchivingCfgItemBySystemCodeAndBusinessCodeAndTaskNameStmt, args...)
+func UpdateApplicationCfgItemBySystemCodeAndBusinessCodeAndConfigItemName(db db.SimpleDB, v *schema.ApplicationCfgItem) error {
+	args := sliceApplicationCfgItem(v)
+	args = append(args, v.SystemCode, v.BusinessCode, v.ConfigItemName)
+	_, err := db.Exec(UpdateApplicationCfgItemBySystemCodeAndBusinessCodeAndConfigItemNameStmt, args...)
 	return err
 }
 
-func GetApplicationArchivingCfgItemById(db db.SimpleDB, iD int64) (*schema.ApplicationArchivingCfgItem, error) {
+func GetApplicationCfgItemById(db db.SimpleDB, iD int64) (*schema.ApplicationCfgItem, error) {
 	args := []interface{}{iD}
-	v, err := genericSelectApplicationArchivingCfgItem(db, SelectApplicationArchivingCfgItemByIdStmt, args...)
+	v, err := genericSelectApplicationCfgItem(db, SelectApplicationCfgItemByIdStmt, args...)
 	return v, err
 }
 
-func GetApplicationArchivingCfgItemBySystemCodeAndBusinessCodeAndTaskName(db db.SimpleDB, systemCode string, businessCode string, taskName string) (*schema.ApplicationArchivingCfgItem, error) {
-	args := []interface{}{systemCode, businessCode, taskName}
-	v, err := genericSelectApplicationArchivingCfgItem(db, SelectApplicationArchivingCfgItemBySystemCodeAndBusinessCodeAndTaskNameStmt, args...)
+func GetApplicationCfgItemBySystemCodeAndBusinessCodeAndConfigItemName(db db.SimpleDB, systemCode string, businessCode string, configItemName string) (*schema.ApplicationCfgItem, error) {
+	args := []interface{}{systemCode, businessCode, configItemName}
+	v, err := genericSelectApplicationCfgItem(db, SelectApplicationCfgItemBySystemCodeAndBusinessCodeAndConfigItemNameStmt, args...)
 	return v, err
 }
 
-func FindAllApplicationArchivingCfgItems(db db.SimpleDB) ([]*schema.ApplicationArchivingCfgItem, error) {
+func FindAllApplicationCfgItems(db db.SimpleDB) ([]*schema.ApplicationCfgItem, error) {
 	args := []interface{}{}
-	v, err := genericSelectApplicationArchivingCfgItems(db, SelectApplicationArchivingCfgItemStmt, args...)
+	v, err := genericSelectApplicationCfgItems(db, SelectApplicationCfgItemStmt, args...)
 	return v, err
 }
 
-func FindAllApplicationArchivingCfgItemsInRange(db db.SimpleDB, limit int64, offset int64) ([]*schema.ApplicationArchivingCfgItem, error) {
+func FindAllApplicationCfgItemsInRange(db db.SimpleDB, limit int64, offset int64) ([]*schema.ApplicationCfgItem, error) {
 	args := []interface{}{limit, offset}
-	v, err := genericSelectApplicationArchivingCfgItems(db, SelectApplicationArchivingCfgItemRangeStmt, args...)
+	v, err := genericSelectApplicationCfgItems(db, SelectApplicationCfgItemRangeStmt, args...)
 	return v, err
 }
 
-func CountApplicationArchivingCfgItem(db db.SimpleDB) (int, error) {
+func CountApplicationCfgItem(db db.SimpleDB) (int, error) {
 	var count int
-	row := db.QueryRow(SelectApplicationArchivingCfgItemCountStmt)
+	row := db.QueryRow(SelectApplicationCfgItemCountStmt)
 	err := row.Scan(&count)
 	return count, err
 }
 
-func CountApplicationArchivingCfgItemBySystemCodeAndBusinessCodeAndTaskName(db db.SimpleDB, systemCode string, businessCode string, taskName string) (int, error) {
+func CountApplicationCfgItemBySystemCodeAndBusinessCodeAndConfigItemName(db db.SimpleDB, systemCode string, businessCode string, configItemName string) (int, error) {
 	var count int
-	args := []interface{}{systemCode, businessCode, taskName}
-	row := db.QueryRow(SelectApplicationArchivingCfgItemCountBySystemCodeAndBusinessCodeAndTaskNameStmt, args...)
+	args := []interface{}{systemCode, businessCode, configItemName}
+	row := db.QueryRow(SelectApplicationCfgItemCountBySystemCodeAndBusinessCodeAndConfigItemNameStmt, args...)
 	err := row.Scan(&count)
 	return count, err
 }
@@ -1873,7 +1846,7 @@ const CreateSecurityLibStmt = `
 CREATE TABLE IF NOT EXISTS security_libs (
  f_id                           BIGINT PRIMARY KEY AUTO_INCREMENT
 ,f_security_lib_code            VARCHAR(32)
-,f_security_type                VARCHAR(16)
+,f_security_type                VARCHAR(2)
 ,f_security_lib_zh_name         VARCHAR(128)
 ,f_security_lib_en_name         VARCHAR(32)
 ,f_preferred_security_id_source VARCHAR(2)
@@ -2327,7 +2300,7 @@ CREATE TABLE IF NOT EXISTS security_items (
 ,f_issue_date                  VARCHAR(16)
 ,f_contract_month              VARCHAR(12)
 ,f_expire_date                 VARCHAR(16)
-,f_security_type               VARCHAR(16)
+,f_security_type               VARCHAR(2)
 ,f_underlying_security_code    VARCHAR(64)
 ,f_underlying_security_zh_name VARCHAR(128)
 ,f_underlying_security_en_name VARCHAR(64)
@@ -3441,7 +3414,6 @@ CREATE TABLE IF NOT EXISTS trade_channels (
 ,f_display_time_zone     VARCHAR(8)
 ,f_begin_time            VARCHAR(8)
 ,f_end_time              VARCHAR(8)
-,f_data_num_adj          INTEGER
 ,f_active_real_address   VARCHAR(64)
 ,f_real_address          VARCHAR(64)
 ,f_export_address        VARCHAR(64)
@@ -3469,7 +3441,6 @@ INSERT INTO trade_channels (
 ,f_display_time_zone
 ,f_begin_time
 ,f_end_time
-,f_data_num_adj
 ,f_active_real_address
 ,f_real_address
 ,f_export_address
@@ -3480,7 +3451,7 @@ INSERT INTO trade_channels (
 ,f_offline_reason
 ,f_config_dir
 ,f_adapter_path
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 `
 
 const SelectTradeChannelStmt = `
@@ -3498,7 +3469,6 @@ SELECT
 ,f_display_time_zone
 ,f_begin_time
 ,f_end_time
-,f_data_num_adj
 ,f_active_real_address
 ,f_real_address
 ,f_export_address
@@ -3527,7 +3497,6 @@ SELECT
 ,f_display_time_zone
 ,f_begin_time
 ,f_end_time
-,f_data_num_adj
 ,f_active_real_address
 ,f_real_address
 ,f_export_address
@@ -3562,7 +3531,6 @@ SELECT
 ,f_display_time_zone
 ,f_begin_time
 ,f_end_time
-,f_data_num_adj
 ,f_active_real_address
 ,f_real_address
 ,f_export_address
@@ -3592,7 +3560,6 @@ UPDATE trade_channels SET
 ,f_display_time_zone=?
 ,f_begin_time=?
 ,f_end_time=?
-,f_data_num_adj=?
 ,f_active_real_address=?
 ,f_real_address=?
 ,f_export_address=?
@@ -3630,7 +3597,6 @@ SELECT
 ,f_display_time_zone
 ,f_begin_time
 ,f_end_time
-,f_data_num_adj
 ,f_active_real_address
 ,f_real_address
 ,f_export_address
@@ -3666,7 +3632,6 @@ UPDATE trade_channels SET
 ,f_display_time_zone=?
 ,f_begin_time=?
 ,f_end_time=?
-,f_data_num_adj=?
 ,f_active_real_address=?
 ,f_real_address=?
 ,f_export_address=?
@@ -3699,17 +3664,16 @@ func scanTradeChannel(row *sql.Row) (*schema.TradeChannel, error) {
 	var v10 sql.NullString
 	var v11 sql.NullString
 	var v12 sql.NullString
-	var v13 sql.NullInt64
+	var v13 sql.NullString
 	var v14 sql.NullString
 	var v15 sql.NullString
-	var v16 sql.NullString
+	var v16 sql.NullInt64
 	var v17 sql.NullInt64
-	var v18 sql.NullInt64
-	var v19 sql.NullString
-	var v20 sql.NullInt64
+	var v18 sql.NullString
+	var v19 sql.NullInt64
+	var v20 sql.NullString
 	var v21 sql.NullString
 	var v22 sql.NullString
-	var v23 sql.NullString
 
 	err := row.Scan(
 		&v0,
@@ -3735,7 +3699,6 @@ func scanTradeChannel(row *sql.Row) (*schema.TradeChannel, error) {
 		&v20,
 		&v21,
 		&v22,
-		&v23,
 	)
 	if err != nil {
 		return nil, err
@@ -3822,67 +3785,61 @@ func scanTradeChannel(row *sql.Row) (*schema.TradeChannel, error) {
 	}
 
 	if v13.Valid {
-		v.DataNumAdj = int(v13.Int64)
-	} else {
-		v.DataNumAdj = 0
-	}
-
-	if v14.Valid {
-		v.ActiveRealAddress = v14.String
+		v.ActiveRealAddress = v13.String
 	} else {
 		v.ActiveRealAddress = ""
 	}
 
-	if v15.Valid {
-		v.RealAddress = v15.String
+	if v14.Valid {
+		v.RealAddress = v14.String
 	} else {
 		v.RealAddress = ""
 	}
 
-	if v16.Valid {
-		v.ExportAddress = v16.String
+	if v15.Valid {
+		v.ExportAddress = v15.String
 	} else {
 		v.ExportAddress = ""
 	}
 
-	if v17.Valid {
-		v.ExportHttpPort = int(v17.Int64)
+	if v16.Valid {
+		v.ExportHttpPort = int(v16.Int64)
 	} else {
 		v.ExportHttpPort = 0
 	}
 
-	if v18.Valid {
-		v.ExportWSPort = int(v18.Int64)
+	if v17.Valid {
+		v.ExportWSPort = int(v17.Int64)
 	} else {
 		v.ExportWSPort = 0
 	}
 
-	if v19.Valid {
-		v.ApiToken = v19.String
+	if v18.Valid {
+		v.ApiToken = v18.String
 	} else {
 		v.ApiToken = ""
 	}
 
-	if v20.Valid {
-		v.Status = int(v20.Int64)
+	if v19.Valid {
+		v.Status = int(v19.Int64)
 	} else {
 		v.Status = 0
 	}
 
-	if v21.Valid {
-		v.OfflineReason = v21.String
+	if v20.Valid {
+		v.OfflineReason = v20.String
 	} else {
 		v.OfflineReason = ""
 	}
 
-	if v22.Valid {
-		v.ConfigDir = v22.String
+	if v21.Valid {
+		v.ConfigDir = v21.String
 	} else {
 		v.ConfigDir = ""
 	}
 
-	if v23.Valid {
-		v.AdapterPath = v23.String
+	if v22.Valid {
+		v.AdapterPath = v22.String
 	} else {
 		v.AdapterPath = ""
 	}
@@ -3907,17 +3864,16 @@ func scanTradeChannels(rows *sql.Rows) ([]*schema.TradeChannel, error) {
 	var v10 sql.NullString
 	var v11 sql.NullString
 	var v12 sql.NullString
-	var v13 sql.NullInt64
+	var v13 sql.NullString
 	var v14 sql.NullString
 	var v15 sql.NullString
-	var v16 sql.NullString
+	var v16 sql.NullInt64
 	var v17 sql.NullInt64
-	var v18 sql.NullInt64
-	var v19 sql.NullString
-	var v20 sql.NullInt64
+	var v18 sql.NullString
+	var v19 sql.NullInt64
+	var v20 sql.NullString
 	var v21 sql.NullString
 	var v22 sql.NullString
-	var v23 sql.NullString
 
 	for rows.Next() {
 		err = rows.Scan(
@@ -3944,7 +3900,6 @@ func scanTradeChannels(rows *sql.Rows) ([]*schema.TradeChannel, error) {
 			&v20,
 			&v21,
 			&v22,
-			&v23,
 		)
 		if err != nil {
 			return vv, err
@@ -4031,67 +3986,61 @@ func scanTradeChannels(rows *sql.Rows) ([]*schema.TradeChannel, error) {
 		}
 
 		if v13.Valid {
-			v.DataNumAdj = int(v13.Int64)
-		} else {
-			v.DataNumAdj = 0
-		}
-
-		if v14.Valid {
-			v.ActiveRealAddress = v14.String
+			v.ActiveRealAddress = v13.String
 		} else {
 			v.ActiveRealAddress = ""
 		}
 
-		if v15.Valid {
-			v.RealAddress = v15.String
+		if v14.Valid {
+			v.RealAddress = v14.String
 		} else {
 			v.RealAddress = ""
 		}
 
-		if v16.Valid {
-			v.ExportAddress = v16.String
+		if v15.Valid {
+			v.ExportAddress = v15.String
 		} else {
 			v.ExportAddress = ""
 		}
 
-		if v17.Valid {
-			v.ExportHttpPort = int(v17.Int64)
+		if v16.Valid {
+			v.ExportHttpPort = int(v16.Int64)
 		} else {
 			v.ExportHttpPort = 0
 		}
 
-		if v18.Valid {
-			v.ExportWSPort = int(v18.Int64)
+		if v17.Valid {
+			v.ExportWSPort = int(v17.Int64)
 		} else {
 			v.ExportWSPort = 0
 		}
 
-		if v19.Valid {
-			v.ApiToken = v19.String
+		if v18.Valid {
+			v.ApiToken = v18.String
 		} else {
 			v.ApiToken = ""
 		}
 
-		if v20.Valid {
-			v.Status = int(v20.Int64)
+		if v19.Valid {
+			v.Status = int(v19.Int64)
 		} else {
 			v.Status = 0
 		}
 
-		if v21.Valid {
-			v.OfflineReason = v21.String
+		if v20.Valid {
+			v.OfflineReason = v20.String
 		} else {
 			v.OfflineReason = ""
 		}
 
-		if v22.Valid {
-			v.ConfigDir = v22.String
+		if v21.Valid {
+			v.ConfigDir = v21.String
 		} else {
 			v.ConfigDir = ""
 		}
 
-		if v23.Valid {
-			v.AdapterPath = v23.String
+		if v22.Valid {
+			v.AdapterPath = v22.String
 		} else {
 			v.AdapterPath = ""
 		}
@@ -4115,17 +4064,16 @@ func sliceTradeChannel(v *schema.TradeChannel) []interface{} {
 	var v10 string
 	var v11 string
 	var v12 string
-	var v13 int
+	var v13 string
 	var v14 string
 	var v15 string
-	var v16 string
+	var v16 int
 	var v17 int
-	var v18 int
-	var v19 string
-	var v20 int
+	var v18 string
+	var v19 int
+	var v20 string
 	var v21 string
 	var v22 string
-	var v23 string
 
 	v0 = v.ID
 	v1 = v.ChannelCode
@@ -4140,17 +4088,16 @@ func sliceTradeChannel(v *schema.TradeChannel) []interface{} {
 	v10 = v.DisplayTimeZone
 	v11 = v.BeginTime
 	v12 = v.EndTime
-	v13 = v.DataNumAdj
-	v14 = v.ActiveRealAddress
-	v15 = v.RealAddress
-	v16 = v.ExportAddress
-	v17 = v.ExportHttpPort
-	v18 = v.ExportWSPort
-	v19 = v.ApiToken
-	v20 = v.Status
-	v21 = v.OfflineReason
-	v22 = v.ConfigDir
-	v23 = v.AdapterPath
+	v13 = v.ActiveRealAddress
+	v14 = v.RealAddress
+	v15 = v.ExportAddress
+	v16 = v.ExportHttpPort
+	v17 = v.ExportWSPort
+	v18 = v.ApiToken
+	v19 = v.Status
+	v20 = v.OfflineReason
+	v21 = v.ConfigDir
+	v22 = v.AdapterPath
 
 	return []interface{}{
 		v0,
@@ -4176,7 +4123,6 @@ func sliceTradeChannel(v *schema.TradeChannel) []interface{} {
 		v20,
 		v21,
 		v22,
-		v23,
 	}
 }
 
@@ -7168,7 +7114,6 @@ CREATE TABLE IF NOT EXISTS data_archiving_logs (
 ,f_system_code            VARCHAR(32)
 ,f_business_code          VARCHAR(32)
 ,f_archiving_date         VARCHAR(8)
-,f_task_name              VARCHAR(32)
 ,f_first_archiving_time   BIGINT
 ,f_current_archiving_time BIGINT
 ,f_exec_count             INTEGER
@@ -7182,13 +7127,12 @@ INSERT INTO data_archiving_logs (
  f_system_code
 ,f_business_code
 ,f_archiving_date
-,f_task_name
 ,f_first_archiving_time
 ,f_current_archiving_time
 ,f_exec_count
 ,f_complete
 ,f_complete_phase
-) VALUES (?,?,?,?,?,?,?,?,?)
+) VALUES (?,?,?,?,?,?,?,?)
 `
 
 const SelectDataArchivingLogStmt = `
@@ -7197,7 +7141,6 @@ SELECT
 ,f_system_code
 ,f_business_code
 ,f_archiving_date
-,f_task_name
 ,f_first_archiving_time
 ,f_current_archiving_time
 ,f_exec_count
@@ -7212,7 +7155,6 @@ SELECT
 ,f_system_code
 ,f_business_code
 ,f_archiving_date
-,f_task_name
 ,f_first_archiving_time
 ,f_current_archiving_time
 ,f_exec_count
@@ -7233,7 +7175,6 @@ SELECT
 ,f_system_code
 ,f_business_code
 ,f_archiving_date
-,f_task_name
 ,f_first_archiving_time
 ,f_current_archiving_time
 ,f_exec_count
@@ -7249,7 +7190,6 @@ UPDATE data_archiving_logs SET
 ,f_system_code=?
 ,f_business_code=?
 ,f_archiving_date=?
-,f_task_name=?
 ,f_first_archiving_time=?
 ,f_current_archiving_time=?
 ,f_exec_count=?
@@ -7264,16 +7204,15 @@ WHERE f_id=?
 `
 
 const CreatePkDalStmt = `
-CREATE UNIQUE INDEX pk_dal ON data_archiving_logs (f_system_code,f_business_code,f_archiving_date,f_task_name);
+CREATE UNIQUE INDEX pk_dal ON data_archiving_logs (f_system_code,f_business_code,f_archiving_date);
 `
 
-const SelectDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskNameStmt = `
+const SelectDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateStmt = `
 SELECT 
  f_id
 ,f_system_code
 ,f_business_code
 ,f_archiving_date
-,f_task_name
 ,f_first_archiving_time
 ,f_current_archiving_time
 ,f_exec_count
@@ -7283,25 +7222,22 @@ FROM data_archiving_logs
 WHERE f_system_code=?
 AND f_business_code=?
 AND f_archiving_date=?
-AND f_task_name=?
 `
 
-const SelectDataArchivingLogCountBySystemCodeAndBusinessCodeAndArchivingDateAndTaskNameStmt = `
+const SelectDataArchivingLogCountBySystemCodeAndBusinessCodeAndArchivingDateStmt = `
 SELECT count(1)
 FROM data_archiving_logs 
 WHERE f_system_code=?
 AND f_business_code=?
 AND f_archiving_date=?
-AND f_task_name=?
 `
 
-const UpdateDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskNameStmt = `
+const UpdateDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateStmt = `
 UPDATE data_archiving_logs SET 
  f_id=?
 ,f_system_code=?
 ,f_business_code=?
 ,f_archiving_date=?
-,f_task_name=?
 ,f_first_archiving_time=?
 ,f_current_archiving_time=?
 ,f_exec_count=?
@@ -7310,15 +7246,13 @@ UPDATE data_archiving_logs SET
 WHERE f_system_code=?
 AND f_business_code=?
 AND f_archiving_date=?
-AND f_task_name=?
 `
 
-const DeleteDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskNameStmt = `
+const DeleteDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateStmt = `
 DELETE FROM data_archiving_logs 
 WHERE f_system_code=?
 AND f_business_code=?
 AND f_archiving_date=?
-AND f_task_name=?
 `
 
 func scanDataArchivingLog(row *sql.Row) (*schema.DataArchivingLog, error) {
@@ -7326,12 +7260,11 @@ func scanDataArchivingLog(row *sql.Row) (*schema.DataArchivingLog, error) {
 	var v1 sql.NullString
 	var v2 sql.NullString
 	var v3 sql.NullString
-	var v4 sql.NullString
+	var v4 sql.NullInt64
 	var v5 sql.NullInt64
 	var v6 sql.NullInt64
-	var v7 sql.NullInt64
-	var v8 sql.NullBool
-	var v9 sql.NullInt64
+	var v7 sql.NullBool
+	var v8 sql.NullInt64
 
 	err := row.Scan(
 		&v0,
@@ -7343,7 +7276,6 @@ func scanDataArchivingLog(row *sql.Row) (*schema.DataArchivingLog, error) {
 		&v6,
 		&v7,
 		&v8,
-		&v9,
 	)
 	if err != nil {
 		return nil, err
@@ -7376,37 +7308,31 @@ func scanDataArchivingLog(row *sql.Row) (*schema.DataArchivingLog, error) {
 	}
 
 	if v4.Valid {
-		v.TaskName = v4.String
-	} else {
-		v.TaskName = ""
-	}
-
-	if v5.Valid {
-		v.FirstArchivingTime = v5.Int64
+		v.FirstArchivingTime = v4.Int64
 	} else {
 		v.FirstArchivingTime = 0
 	}
 
-	if v6.Valid {
-		v.CurrentArchivingTime = v6.Int64
+	if v5.Valid {
+		v.CurrentArchivingTime = v5.Int64
 	} else {
 		v.CurrentArchivingTime = 0
 	}
 
-	if v7.Valid {
-		v.ExecCount = int(v7.Int64)
+	if v6.Valid {
+		v.ExecCount = int(v6.Int64)
 	} else {
 		v.ExecCount = 0
 	}
 
-	if v8.Valid {
-		v.Complete = v8.Bool
+	if v7.Valid {
+		v.Complete = v7.Bool
 	} else {
 		v.Complete = false
 	}
 
-	if v9.Valid {
-		v.CompletePhase = int(v9.Int64)
+	if v8.Valid {
+		v.CompletePhase = int(v8.Int64)
 	} else {
 		v.CompletePhase = 0
 	}
@@ -7422,12 +7348,11 @@ func scanDataArchivingLogs(rows *sql.Rows) ([]*schema.DataArchivingLog, error) {
 	var v1 sql.NullString
 	var v2 sql.NullString
 	var v3 sql.NullString
-	var v4 sql.NullString
+	var v4 sql.NullInt64
 	var v5 sql.NullInt64
 	var v6 sql.NullInt64
-	var v7 sql.NullInt64
-	var v8 sql.NullBool
-	var v9 sql.NullInt64
+	var v7 sql.NullBool
+	var v8 sql.NullInt64
 
 	for rows.Next() {
 		err = rows.Scan(
@@ -7440,7 +7365,6 @@ func scanDataArchivingLogs(rows *sql.Rows) ([]*schema.DataArchivingLog, error) {
 			&v6,
 			&v7,
 			&v8,
-			&v9,
 		)
 		if err != nil {
 			return vv, err
@@ -7473,37 +7397,31 @@ func scanDataArchivingLogs(rows *sql.Rows) ([]*schema.DataArchivingLog, error) {
 		}
 
 		if v4.Valid {
-			v.TaskName = v4.String
-		} else {
-			v.TaskName = ""
-		}
-
-		if v5.Valid {
-			v.FirstArchivingTime = v5.Int64
+			v.FirstArchivingTime = v4.Int64
 		} else {
 			v.FirstArchivingTime = 0
 		}
 
-		if v6.Valid {
-			v.CurrentArchivingTime = v6.Int64
+		if v5.Valid {
+			v.CurrentArchivingTime = v5.Int64
 		} else {
 			v.CurrentArchivingTime = 0
 		}
 
-		if v7.Valid {
-			v.ExecCount = int(v7.Int64)
+		if v6.Valid {
+			v.ExecCount = int(v6.Int64)
 		} else {
 			v.ExecCount = 0
 		}
 
-		if v8.Valid {
-			v.Complete = v8.Bool
+		if v7.Valid {
+			v.Complete = v7.Bool
 		} else {
 			v.Complete = false
 		}
 
-		if v9.Valid {
-			v.CompletePhase = int(v9.Int64)
+		if v8.Valid {
+			v.CompletePhase = int(v8.Int64)
 		} else {
 			v.CompletePhase = 0
 		}
@@ -7518,23 +7436,21 @@ func sliceDataArchivingLog(v *schema.DataArchivingLog) []interface{} {
 	var v1 string
 	var v2 string
 	var v3 string
-	var v4 string
+	var v4 int64
 	var v5 int64
-	var v6 int64
-	var v7 int
-	var v8 bool
-	var v9 int
+	var v6 int
+	var v7 bool
+	var v8 int
 
 	v0 = v.ID
 	v1 = v.SystemCode
 	v2 = v.BusinessCode
 	v3 = v.ArchivingDate
-	v4 = v.TaskName
-	v5 = v.FirstArchivingTime
-	v6 = v.CurrentArchivingTime
-	v7 = v.ExecCount
-	v8 = v.Complete
-	v9 = v.CompletePhase
+	v4 = v.FirstArchivingTime
+	v5 = v.CurrentArchivingTime
+	v6 = v.ExecCount
+	v7 = v.Complete
+	v8 = v.CompletePhase
 
 	return []interface{}{
 		v0,
@@ -7546,7 +7462,6 @@ func sliceDataArchivingLog(v *schema.DataArchivingLog) []interface{} {
 		v6,
 		v7,
 		v8,
-		v9,
 	}
 }
 
@@ -7581,9 +7496,9 @@ func DeleteDataArchivingLogById(db db.SimpleDB, iD int64) error {
 	return err
 }
 
-func DeleteDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskName(db db.SimpleDB, systemCode string, businessCode string, archivingDate string, taskName string) error {
-	args := []interface{}{systemCode, businessCode, archivingDate, taskName}
-	_, err := db.Exec(DeleteDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskNameStmt, args...)
+func DeleteDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDate(db db.SimpleDB, systemCode string, businessCode string, archivingDate string) error {
+	args := []interface{}{systemCode, businessCode, archivingDate}
+	_, err := db.Exec(DeleteDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateStmt, args...)
 	return err
 }
 
@@ -7594,10 +7509,10 @@ func UpdateDataArchivingLogById(db db.SimpleDB, v *schema.DataArchivingLog) erro
 	return err
 }
 
-func UpdateDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskName(db db.SimpleDB, v *schema.DataArchivingLog) error {
+func UpdateDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDate(db db.SimpleDB, v *schema.DataArchivingLog) error {
 	args := sliceDataArchivingLog(v)
-	args = append(args, v.SystemCode, v.BusinessCode, v.ArchivingDate, v.TaskName)
-	_, err := db.Exec(UpdateDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskNameStmt, args...)
+	args = append(args, v.SystemCode, v.BusinessCode, v.ArchivingDate)
+	_, err := db.Exec(UpdateDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateStmt, args...)
 	return err
 }
 
@@ -7607,9 +7522,9 @@ func GetDataArchivingLogById(db db.SimpleDB, iD int64) (*schema.DataArchivingLog
 	return v, err
 }
 
-func GetDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskName(db db.SimpleDB, systemCode string, businessCode string, archivingDate string, taskName string) (*schema.DataArchivingLog, error) {
-	args := []interface{}{systemCode, businessCode, archivingDate, taskName}
-	v, err := genericSelectDataArchivingLog(db, SelectDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskNameStmt, args...)
+func GetDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDate(db db.SimpleDB, systemCode string, businessCode string, archivingDate string) (*schema.DataArchivingLog, error) {
+	args := []interface{}{systemCode, businessCode, archivingDate}
+	v, err := genericSelectDataArchivingLog(db, SelectDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateStmt, args...)
 	return v, err
 }
 
@@ -7632,10 +7547,10 @@ func CountDataArchivingLog(db db.SimpleDB) (int, error) {
 	return count, err
 }
 
-func CountDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDateAndTaskName(db db.SimpleDB, systemCode string, businessCode string, archivingDate string, taskName string) (int, error) {
+func CountDataArchivingLogBySystemCodeAndBusinessCodeAndArchivingDate(db db.SimpleDB, systemCode string, businessCode string, archivingDate string) (int, error) {
 	var count int
-	args := []interface{}{systemCode, businessCode, archivingDate, taskName}
-	row := db.QueryRow(SelectDataArchivingLogCountBySystemCodeAndBusinessCodeAndArchivingDateAndTaskNameStmt, args...)
+	args := []interface{}{systemCode, businessCode, archivingDate}
+	row := db.QueryRow(SelectDataArchivingLogCountBySystemCodeAndBusinessCodeAndArchivingDateStmt, args...)
 	err := row.Scan(&count)
 	return count, err
 }
@@ -7646,7 +7561,6 @@ CREATE TABLE IF NOT EXISTS data_purging_logs (
 ,f_system_code                      VARCHAR(32)
 ,f_business_code                    VARCHAR(32)
 ,f_purging_date                     VARCHAR(8)
-,f_task_name                        VARCHAR(32)
 ,f_group_trade_order_purging        LONGTEXT
 ,f_trade_order_purging              LONGTEXT
 ,f_trade_action_latest_resp_purging LONGTEXT
@@ -7664,7 +7578,6 @@ INSERT INTO data_purging_logs (
  f_system_code
 ,f_business_code
 ,f_purging_date
-,f_task_name
 ,f_group_trade_order_purging
 ,f_trade_order_purging
 ,f_trade_action_latest_resp_purging
@@ -7674,7 +7587,7 @@ INSERT INTO data_purging_logs (
 ,f_exec_count
 ,f_complete
 ,f_complete_phase
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
 `
 
 const SelectDataPurgingLogStmt = `
@@ -7683,7 +7596,6 @@ SELECT
 ,f_system_code
 ,f_business_code
 ,f_purging_date
-,f_task_name
 ,f_group_trade_order_purging
 ,f_trade_order_purging
 ,f_trade_action_latest_resp_purging
@@ -7702,7 +7614,6 @@ SELECT
 ,f_system_code
 ,f_business_code
 ,f_purging_date
-,f_task_name
 ,f_group_trade_order_purging
 ,f_trade_order_purging
 ,f_trade_action_latest_resp_purging
@@ -7727,7 +7638,6 @@ SELECT
 ,f_system_code
 ,f_business_code
 ,f_purging_date
-,f_task_name
 ,f_group_trade_order_purging
 ,f_trade_order_purging
 ,f_trade_action_latest_resp_purging
@@ -7747,7 +7657,6 @@ UPDATE data_purging_logs SET
 ,f_system_code=?
 ,f_business_code=?
 ,f_purging_date=?
-,f_task_name=?
 ,f_group_trade_order_purging=?
 ,f_trade_order_purging=?
 ,f_trade_action_latest_resp_purging=?
@@ -7766,16 +7675,15 @@ WHERE f_id=?
 `
 
 const CreatePkDclStmt = `
-CREATE UNIQUE INDEX pk_dcl ON data_purging_logs (f_system_code,f_business_code,f_purging_date,f_task_name);
+CREATE UNIQUE INDEX pk_dcl ON data_purging_logs (f_system_code,f_business_code,f_purging_date);
 `
 
-const SelectDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskNameStmt = `
+const SelectDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateStmt = `
 SELECT 
  f_id
 ,f_system_code
 ,f_business_code
 ,f_purging_date
-,f_task_name
 ,f_group_trade_order_purging
 ,f_trade_order_purging
 ,f_trade_action_latest_resp_purging
@@ -7789,25 +7697,22 @@ FROM data_purging_logs
 WHERE f_system_code=?
 AND f_business_code=?
 AND f_purging_date=?
-AND f_task_name=?
 `
 
-const SelectDataPurgingLogCountBySystemCodeAndBusinessCodeAndPurgingDateAndTaskNameStmt = `
+const SelectDataPurgingLogCountBySystemCodeAndBusinessCodeAndPurgingDateStmt = `
 SELECT count(1)
 FROM data_purging_logs 
 WHERE f_system_code=?
 AND f_business_code=?
 AND f_purging_date=?
-AND f_task_name=?
 `
 
-const UpdateDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskNameStmt = `
+const UpdateDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateStmt = `
 UPDATE data_purging_logs SET 
  f_id=?
 ,f_system_code=?
 ,f_business_code=?
 ,f_purging_date=?
-,f_task_name=?
 ,f_group_trade_order_purging=?
 ,f_trade_order_purging=?
 ,f_trade_action_latest_resp_purging=?
@@ -7820,15 +7725,13 @@ UPDATE data_purging_logs SET
 WHERE f_system_code=?
 AND f_business_code=?
 AND f_purging_date=?
-AND f_task_name=?
 `
 
-const DeleteDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskNameStmt = `
+const DeleteDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateStmt = `
 DELETE FROM data_purging_logs 
 WHERE f_system_code=?
 AND f_business_code=?
 AND f_purging_date=?
-AND f_task_name=?
 `
 
 func scanDataPurgingLog(row *sql.Row) (*schema.DataPurgingLog, error) {
@@ -7840,12 +7743,11 @@ func scanDataPurgingLog(row *sql.Row) (*schema.DataPurgingLog, error) {
 	var v5 sql.NullString
 	var v6 sql.NullString
 	var v7 sql.NullString
-	var v8 sql.NullString
+	var v8 sql.NullInt64
 	var v9 sql.NullInt64
 	var v10 sql.NullInt64
-	var v11 sql.NullInt64
-	var v12 sql.NullBool
-	var v13 sql.NullInt64
+	var v11 sql.NullBool
+	var v12 sql.NullInt64
 
 	err := row.Scan(
 		&v0,
@@ -7861,7 +7763,6 @@ func scanDataPurgingLog(row *sql.Row) (*schema.DataPurgingLog, error) {
 		&v10,
 		&v11,
 		&v12,
-		&v13,
 	)
 	if err != nil {
 		return nil, err
@@ -7894,61 +7795,55 @@ func scanDataPurgingLog(row *sql.Row) (*schema.DataPurgingLog, error) {
 	}
 
 	if v4.Valid {
-		v.TaskName = v4.String
-	} else {
-		v.TaskName = ""
-	}
-
-	if v5.Valid {
-		v.GroupTradeOrderPurging = v5.String
+		v.GroupTradeOrderPurging = v4.String
 	} else {
 		v.GroupTradeOrderPurging = ""
 	}
 
-	if v6.Valid {
-		v.TradeOrderPurging = v6.String
+	if v5.Valid {
+		v.TradeOrderPurging = v5.String
 	} else {
 		v.TradeOrderPurging = ""
 	}
 
-	if v7.Valid {
-		v.TradeActionLatestRespPurging = v7.String
+	if v6.Valid {
+		v.TradeActionLatestRespPurging = v6.String
 	} else {
 		v.TradeActionLatestRespPurging = ""
 	}
 
-	if v8.Valid {
-		v.TradeActionRespPurge = v8.String
+	if v7.Valid {
+		v.TradeActionRespPurge = v7.String
 	} else {
 		v.TradeActionRespPurge = ""
 	}
 
-	if v9.Valid {
-		v.FirstPurgingTime = v9.Int64
+	if v8.Valid {
+		v.FirstPurgingTime = v8.Int64
 	} else {
 		v.FirstPurgingTime = 0
 	}
 
-	if v10.Valid {
-		v.CurrentPurgingTime = v10.Int64
+	if v9.Valid {
+		v.CurrentPurgingTime = v9.Int64
 	} else {
 		v.CurrentPurgingTime = 0
 	}
 
-	if v11.Valid {
-		v.ExecCount = int(v11.Int64)
+	if v10.Valid {
+		v.ExecCount = int(v10.Int64)
 	} else {
 		v.ExecCount = 0
 	}
 
-	if v12.Valid {
-		v.Complete = v12.Bool
+	if v11.Valid {
+		v.Complete = v11.Bool
 	} else {
 		v.Complete = false
 	}
 
-	if v13.Valid {
-		v.CompletePhase = int(v13.Int64)
+	if v12.Valid {
+		v.CompletePhase = int(v12.Int64)
 	} else {
 		v.CompletePhase = 0
 	}
@@ -7968,12 +7863,11 @@ func scanDataPurgingLogs(rows *sql.Rows) ([]*schema.DataPurgingLog, error) {
 	var v5 sql.NullString
 	var v6 sql.NullString
 	var v7 sql.NullString
-	var v8 sql.NullString
+	var v8 sql.NullInt64
 	var v9 sql.NullInt64
 	var v10 sql.NullInt64
-	var v11 sql.NullInt64
-	var v12 sql.NullBool
-	var v13 sql.NullInt64
+	var v11 sql.NullBool
+	var v12 sql.NullInt64
 
 	for rows.Next() {
 		err = rows.Scan(
@@ -7990,7 +7884,6 @@ func scanDataPurgingLogs(rows *sql.Rows) ([]*schema.DataPurgingLog, error) {
 			&v10,
 			&v11,
 			&v12,
-			&v13,
 		)
 		if err != nil {
 			return vv, err
@@ -8023,61 +7916,55 @@ func scanDataPurgingLogs(rows *sql.Rows) ([]*schema.DataPurgingLog, error) {
 		}
 
 		if v4.Valid {
-			v.TaskName = v4.String
-		} else {
-			v.TaskName = ""
-		}
-
-		if v5.Valid {
-			v.GroupTradeOrderPurging = v5.String
+			v.GroupTradeOrderPurging = v4.String
 		} else {
 			v.GroupTradeOrderPurging = ""
 		}
 
-		if v6.Valid {
-			v.TradeOrderPurging = v6.String
+		if v5.Valid {
+			v.TradeOrderPurging = v5.String
 		} else {
 			v.TradeOrderPurging = ""
 		}
 
-		if v7.Valid {
-			v.TradeActionLatestRespPurging = v7.String
+		if v6.Valid {
+			v.TradeActionLatestRespPurging = v6.String
 		} else {
 			v.TradeActionLatestRespPurging = ""
 		}
 
-		if v8.Valid {
-			v.TradeActionRespPurge = v8.String
+		if v7.Valid {
+			v.TradeActionRespPurge = v7.String
 		} else {
 			v.TradeActionRespPurge = ""
 		}
 
-		if v9.Valid {
-			v.FirstPurgingTime = v9.Int64
+		if v8.Valid {
+			v.FirstPurgingTime = v8.Int64
 		} else {
 			v.FirstPurgingTime = 0
 		}
 
-		if v10.Valid {
-			v.CurrentPurgingTime = v10.Int64
+		if v9.Valid {
+			v.CurrentPurgingTime = v9.Int64
 		} else {
 			v.CurrentPurgingTime = 0
 		}
 
-		if v11.Valid {
-			v.ExecCount = int(v11.Int64)
+		if v10.Valid {
+			v.ExecCount = int(v10.Int64)
 		} else {
 			v.ExecCount = 0
 		}
 
-		if v12.Valid {
-			v.Complete = v12.Bool
+		if v11.Valid {
+			v.Complete = v11.Bool
 		} else {
 			v.Complete = false
 		}
 
-		if v13.Valid {
-			v.CompletePhase = int(v13.Int64)
+		if v12.Valid {
+			v.CompletePhase = int(v12.Int64)
 		} else {
 			v.CompletePhase = 0
 		}
@@ -8096,27 +7983,25 @@ func sliceDataPurgingLog(v *schema.DataPurgingLog) []interface{} {
 	var v5 string
 	var v6 string
 	var v7 string
-	var v8 string
+	var v8 int64
 	var v9 int64
-	var v10 int64
-	var v11 int
-	var v12 bool
-	var v13 int
+	var v10 int
+	var v11 bool
+	var v12 int
 
 	v0 = v.ID
 	v1 = v.SystemCode
 	v2 = v.BusinessCode
 	v3 = v.PurgingDate
-	v4 = v.TaskName
-	v5 = v.GroupTradeOrderPurging
-	v6 = v.TradeOrderPurging
-	v7 = v.TradeActionLatestRespPurging
-	v8 = v.TradeActionRespPurge
-	v9 = v.FirstPurgingTime
-	v10 = v.CurrentPurgingTime
-	v11 = v.ExecCount
-	v12 = v.Complete
-	v13 = v.CompletePhase
+	v4 = v.GroupTradeOrderPurging
+	v5 = v.TradeOrderPurging
+	v6 = v.TradeActionLatestRespPurging
+	v7 = v.TradeActionRespPurge
+	v8 = v.FirstPurgingTime
+	v9 = v.CurrentPurgingTime
+	v10 = v.ExecCount
+	v11 = v.Complete
+	v12 = v.CompletePhase
 
 	return []interface{}{
 		v0,
@@ -8132,7 +8017,6 @@ func sliceDataPurgingLog(v *schema.DataPurgingLog) []interface{} {
 		v10,
 		v11,
 		v12,
-		v13,
 	}
 }
 
@@ -8167,9 +8051,9 @@ func DeleteDataPurgingLogById(db db.SimpleDB, iD int64) error {
 	return err
 }
 
-func DeleteDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskName(db db.SimpleDB, systemCode string, businessCode string, purgingDate string, taskName string) error {
-	args := []interface{}{systemCode, businessCode, purgingDate, taskName}
-	_, err := db.Exec(DeleteDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskNameStmt, args...)
+func DeleteDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDate(db db.SimpleDB, systemCode string, businessCode string, purgingDate string) error {
+	args := []interface{}{systemCode, businessCode, purgingDate}
+	_, err := db.Exec(DeleteDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateStmt, args...)
 	return err
 }
 
@@ -8180,10 +8064,10 @@ func UpdateDataPurgingLogById(db db.SimpleDB, v *schema.DataPurgingLog) error {
 	return err
 }
 
-func UpdateDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskName(db db.SimpleDB, v *schema.DataPurgingLog) error {
+func UpdateDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDate(db db.SimpleDB, v *schema.DataPurgingLog) error {
 	args := sliceDataPurgingLog(v)
-	args = append(args, v.SystemCode, v.BusinessCode, v.PurgingDate, v.TaskName)
-	_, err := db.Exec(UpdateDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskNameStmt, args...)
+	args = append(args, v.SystemCode, v.BusinessCode, v.PurgingDate)
+	_, err := db.Exec(UpdateDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateStmt, args...)
 	return err
 }
 
@@ -8193,9 +8077,9 @@ func GetDataPurgingLogById(db db.SimpleDB, iD int64) (*schema.DataPurgingLog, er
 	return v, err
 }
 
-func GetDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskName(db db.SimpleDB, systemCode string, businessCode string, purgingDate string, taskName string) (*schema.DataPurgingLog, error) {
-	args := []interface{}{systemCode, businessCode, purgingDate, taskName}
-	v, err := genericSelectDataPurgingLog(db, SelectDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskNameStmt, args...)
+func GetDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDate(db db.SimpleDB, systemCode string, businessCode string, purgingDate string) (*schema.DataPurgingLog, error) {
+	args := []interface{}{systemCode, businessCode, purgingDate}
+	v, err := genericSelectDataPurgingLog(db, SelectDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateStmt, args...)
 	return v, err
 }
 
@@ -8218,10 +8102,10 @@ func CountDataPurgingLog(db db.SimpleDB) (int, error) {
 	return count, err
 }
 
-func CountDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDateAndTaskName(db db.SimpleDB, systemCode string, businessCode string, purgingDate string, taskName string) (int, error) {
+func CountDataPurgingLogBySystemCodeAndBusinessCodeAndPurgingDate(db db.SimpleDB, systemCode string, businessCode string, purgingDate string) (int, error) {
 	var count int
-	args := []interface{}{systemCode, businessCode, purgingDate, taskName}
-	row := db.QueryRow(SelectDataPurgingLogCountBySystemCodeAndBusinessCodeAndPurgingDateAndTaskNameStmt, args...)
+	args := []interface{}{systemCode, businessCode, purgingDate}
+	row := db.QueryRow(SelectDataPurgingLogCountBySystemCodeAndBusinessCodeAndPurgingDateStmt, args...)
 	err := row.Scan(&count)
 	return count, err
 }

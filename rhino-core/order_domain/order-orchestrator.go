@@ -8,10 +8,12 @@ import (
 	"rhino-common/utils/dbutil"
 	"rhino-core/adapter_registry"
 	"rhino-core/domain_cfg"
+	"rhino-core/order_domain/order_archive"
 	"rhino-core/order_domain/order_cache"
 	"rhino-core/order_domain/order_capital"
 	"rhino-core/order_domain/order_manager"
 	"rhino-core/order_domain/order_position_manager"
+	"rhino-core/order_domain/order_purge"
 	"rhino-core/order_domain/schedule"
 	"rhino-core/schema"
 	"rhino-core/store/app_store"
@@ -32,16 +34,17 @@ type orderOrResp struct {
 }
 
 type OrderOrchestrator struct {
-	applicationCfg                       *domain_cfg.ApplicationCfg
-	buffer                               chan *orderOrResp
-	orderCache                           *order_cache.OrderCache
-	orderOrderArchivingAndPurgingManager *OrderOrderArchivingAndPurgingManager
-	directTradeOrderManager              OrderManagerInterface
-	algTradeOrderManager                 OrderManagerInterface
-	instrTradeOrderManager               OrderManagerInterface
-	crossDateTradeOrderManager           OrderManagerInterface
-	capitalCalculator                    *order_capital.CapitalCalculator
-	positionManager                      *order_position_manager.PositionManager
+	applicationCfg             *domain_cfg.ApplicationCfg
+	buffer                     chan *orderOrResp
+	orderCache                 *order_cache.OrderCache
+	orderArchiver              *order_archive.OrderArchiver
+	orderPurger                *order_purge.OrderPurger
+	directTradeOrderManager    OrderManagerInterface
+	algTradeOrderManager       OrderManagerInterface
+	instrTradeOrderManager     OrderManagerInterface
+	crossDateTradeOrderManager OrderManagerInterface
+	capitalCalculator          *order_capital.CapitalCalculator
+	positionManager            *order_position_manager.PositionManager
 	//positionCalculator         *order_position.PositionCalculator
 }
 
@@ -110,7 +113,7 @@ func NewOrderOrchestrator(applicationCfg *domain_cfg.ApplicationCfg, tradeRespCh
 	inst := &OrderOrchestrator{
 		applicationCfg:          applicationCfg,
 		buffer:                  make(chan *orderOrResp, 4096),
-		orderCache:              order_cache.NewOrderCache(true, applicationCfg, positionManager, tradeRespChs, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil),
+		orderCache:              order_cache.NewOrderCache(true, applicationCfg, positionManager, tradeRespChs, nil, nil, nil, nil, nil, nil, nil, nil, nil),
 		directTradeOrderManager: order_manager.NewDirectTradeOrderManager(),
 		capitalCalculator:       capitalCalculator,
 		positionManager:         positionManager,
@@ -120,9 +123,8 @@ func NewOrderOrchestrator(applicationCfg *domain_cfg.ApplicationCfg, tradeRespCh
 	log.Printf("finish NewOrderOrchestrator")
 
 	// 初始化归档器
-	//inst.orderArchiver = order_archive.NewOrderArchiver(applicationCfg, inst.orderCache, scheduleAdapter)
-	//inst.orderPurger = order_purge.NewOrderPurger(applicationCfg, inst.orderCache, inst.orderArchiver, scheduleAdapter, positionManager)
-	inst.orderOrderArchivingAndPurgingManager = NewOrderOrderArchivingAndPurgingManager(applicationCfg, inst.orderCache, scheduleAdapter, positionManager)
+	inst.orderArchiver = order_archive.NewOrderArchiver(applicationCfg, inst.orderCache, scheduleAdapter)
+	inst.orderPurger = order_purge.NewOrderPurger(applicationCfg, inst.orderCache, inst.orderArchiver, scheduleAdapter, positionManager)
 
 	inst.start()
 	return inst
@@ -140,9 +142,8 @@ func (o *OrderOrchestrator) start() {
 		}
 	}()
 
-	//o.orderArchiver.Start()
-	//o.orderPurger.Start()
-	o.orderOrderArchivingAndPurgingManager.Start()
+	o.orderArchiver.Start()
+	o.orderPurger.Start()
 }
 
 func (o *OrderOrchestrator) orchestrateOrder(tradeOrder *schema.TradeOrder) {
@@ -171,7 +172,7 @@ func (o *OrderOrchestrator) doUpdateOrderStatus(resp *schema.TradeActionResp) {
 	orderUpdateAttributes := o.orderCache.UpdateByTradeActionResp(resp)
 	if len(orderUpdateAttributes) > 0 {
 		o.UpdateOrderAttributes(&types.ApplicationOrderAttributeUpdateRequest{
-			AppOrdID:         resp.AppOrdID,
+			AppOrdID : resp.AppOrdID,
 			UpdateAttributes: orderUpdateAttributes,
 		})
 	}
@@ -507,11 +508,11 @@ func (o *OrderOrchestrator) DeleteOrderDraft(orderDraftDeletion *types.Applicati
 
 // 强制归档
 func (o *OrderOrchestrator) ForceArchiving() {
-	o.orderOrderArchivingAndPurgingManager.ForceArchiving()
+	o.orderArchiver.ForceArchiving()
 }
 
 func (o *OrderOrchestrator) ForcePurging() {
-	o.orderOrderArchivingAndPurgingManager.ForcePurging()
+	o.orderPurger.ForcePurging()
 }
 
 func (o *OrderOrchestrator) GetOrderCache() *order_cache.OrderCache {

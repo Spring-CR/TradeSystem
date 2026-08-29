@@ -72,31 +72,9 @@ func (a *TitansFiccAPIAdapter) RefineAndValidate(tradeOrder *schema.TradeOrder, 
 			tradeOrder.ExtendAttrMap["investorID"] = a.twoInvestorID[1]
 		}
 	}
-
-	// 获取是否账户组的标记
-	groupFlag, _, _ := attrutil.GetAttrValue(valList[0], "GroupAccountFlag", enum.AttrValueType_STRING)
-	if groupFlag == "Y" {
-		tradeOrder.ExtendAttrMap["groupAccountFlag"] = 1
-	} else {
-		tradeOrder.ExtendAttrMap["groupAccountFlag"] = 0
-	}
-
-	// 判断是否允许的业务类型，只有普通交易对手才做这一层判断
-	if groupFlag != "Y" {
-		allowedBusinessTypes, _, _ := attrutil.GetAttrValue(valList[0], "AllowedBusinessTypes", enum.AttrValueType_STRING)
-		if !strings.Contains(allowedBusinessTypes.(string), "TRS") {
-			return domain_error.BuildWithDetails(domain_error.ERROR, tradeOrder, domain_error.CUST_QUAL_NOT_CORRECT_ERR_CODE, nil)
-		}
-		// 如果归属于某个组，也是不能下单的
-		counterpartyGroupID, _, _ := attrutil.GetAttrValue(valList[0], "CounterpartyGroupID", enum.AttrValueType_INT)
-		if counterpartyGroupID.(int) > 0 {
-			return domain_error.BuildWithDetails(domain_error.ERROR, tradeOrder, domain_error.MEMBER_ACCOUNT_NOT_ALLOW_TRADE_ERR_CODE, nil, counterpartyID, counterpartyGroupID)
-		}
-	} else { // 检验该账户组是否可交易
-		groupAccountTradable, _, _ := attrutil.GetAttrValue(valList[0], "GroupAccountTradable", enum.AttrValueType_STRING)
-		if groupAccountTradable != "Y" {
-			return domain_error.BuildWithDetails(domain_error.ERROR, tradeOrder, domain_error.TRADE_FLAG_NOT_OPEN_ERR_CODE, nil, counterpartyID)
-		}
+	allowedBusinessTypes, _, _ := attrutil.GetAttrValue(valList[0], "AllowedBusinessTypes", enum.AttrValueType_STRING)
+	if !strings.Contains(allowedBusinessTypes.(string), "TRS") {
+		return domain_error.BuildWithDetails(domain_error.ERROR, tradeOrder, domain_error.CUST_QUAL_NOT_CORRECT_ERR_CODE, nil)
 	}
 
 	// 设置counterpartyID
@@ -346,12 +324,6 @@ func (a *TitansFiccAPIAdapter) RefineAndValidate(tradeOrder *schema.TradeOrder, 
 			}
 		}
 		if !ok || len(valList) == 0 {
-			valList, ok, de = a.autoSyncRepo.Get("CapitalAccount", strconv.Itoa(counterpartyID.(int))+"-GROUP-CNY")
-			if de != nil {
-				return de
-			}
-		}
-		if !ok || len(valList) == 0 {
 			// 资金账号不通过
 			return domain_error.BuildWithDetails(domain_error.ERROR, tradeOrder, domain_error.CAP_ACCT_NOT_FOUND_ERR_CODE, nil)
 		}
@@ -367,12 +339,6 @@ func (a *TitansFiccAPIAdapter) RefineAndValidate(tradeOrder *schema.TradeOrder, 
 		}
 		if !ok || len(valList) == 0 {
 			valList, ok, de = a.autoSyncRepo.Get("CapitalAccount", strconv.Itoa(capitalAcctID.(int))+"-"+strconv.Itoa(counterpartyID.(int))+"-MIXTURE-CNY")
-			if de != nil {
-				return de
-			}
-		}
-		if !ok || len(valList) == 0 {
-			valList, ok, de = a.autoSyncRepo.Get("CapitalAccount", strconv.Itoa(capitalAcctID.(int))+"-"+strconv.Itoa(counterpartyID.(int))+"-GROUP-CNY")
 			if de != nil {
 				return de
 			}
@@ -481,7 +447,7 @@ func (a *TitansFiccAPIAdapter) RefineAndValidate(tradeOrder *schema.TradeOrder, 
 		handlInstKey = "3"
 		tradeOrder.AlgName = ""
 	}
-
+	
 	commissionRate, ok := a.getComissionRate(planID, securityType, bondType, handlInstKey, tradeOrder.Side)
 	var commissionRate1 float64
 	var commissionRate1Ok bool

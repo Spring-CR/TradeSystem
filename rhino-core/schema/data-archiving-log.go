@@ -5,7 +5,6 @@ type DataArchivingLog struct {
 	SystemCode           string `sql:"unique: pk_dal, size: 32"`
 	BusinessCode         string `sql:"index: pk_dal, size: 32"`
 	ArchivingDate        string `sql:"index: pk_dal, size: 8"`
-	TaskName             string `sql:"index: pk_dal, size: 32"`
 	FirstArchivingTime   int64
 	CurrentArchivingTime int64
 	ExecCount            int

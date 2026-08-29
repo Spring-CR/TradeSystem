@@ -17,7 +17,6 @@ const (
 )
 
 type logData struct {
-	key     string
 	order   *schema.TradeOrder
 	resp    *schema.TradeActionResp
 	logTime time.Time
@@ -46,10 +45,11 @@ func NewOrderLog(logDir string, logChanLen int, flushInterval time.Duration, get
 		go func() {
 			orderLog.keepLogging()
 		}()
-		time.Sleep(2 * time.Second)
+		time.Sleep(2*time.Second)
 	}
 	return orderLog
 }
+
 
 func (l *OrderLog) createWriterByKey(key string) io.Writer {
 	// 确保日志目录存在
@@ -91,26 +91,13 @@ func (l *OrderLog) keepLogging() {
 		select {
 		case logData := <-l.logChan:
 			t := logData.logTime.Format(logTimeFormat)
-			
-			var key string
-
-			if logData.order != nil {
-				key = t[:8] + "_" + l.getKeyFunc(logData.order)
-			} else {
-				key = t[:8] + "_" + logData.key
-			}
-			
+			key := t[:8] + "_" + l.getKeyFunc(logData.order)
 			var logContent string
-			if logData.order != nil {
-				if logData.resp == nil {
-					logContent = fmt.Sprintf("%s[order=%v|symbol=%v|side=%v]%s\n", t, logData.order.AppOrdID, logData.order.Symbol, logData.order.Side, logData.data)
-				} else {
-					logContent = fmt.Sprintf("%s[order=%v|symbol=%v|side=%v][resp.ordStatus=%v｜lastShares=%v｜lastPx=%v]%s\n", t, logData.order.AppOrdID, logData.order.Symbol, logData.order.Side, logData.resp.OrdStatus, logData.resp.LastShares, logData.resp.LastPx, logData.data)
-				}
+			if logData.resp == nil {
+				logContent = fmt.Sprintf("%s[order=%v|symbol=%v|side=%v]%s\n", t, logData.order.AppOrdID, logData.order.Symbol, logData.order.Side, logData.data)
 			} else {
-				logContent = fmt.Sprintf("%s%s\n", t, logData.data)
+				logContent = fmt.Sprintf("%s[order=%v|symbol=%v|side=%v][resp.ordStatus=%v｜lastShares=%v｜lastPx=%v]%s\n", t, logData.order.AppOrdID, logData.order.Symbol, logData.order.Side, logData.resp.OrdStatus, logData.resp.LastShares, logData.resp.LastPx, logData.data)
 			}
-			
 
 			writer, ok := l.writerMap[key]
 			if !ok {
@@ -131,17 +118,6 @@ func (l *OrderLog) Printf(order *schema.TradeOrder, resp *schema.TradeActionResp
 		return
 	}
 	logData := &logData{order: order, resp: resp, logTime: time.Now(), data: fmt.Sprintf(content, args...)}
-	l.logChan <- logData
-}
-
-func (l *OrderLog) PrintfWithKey(key string, content string, args ...interface{}) {
-	if !l.running {
-		return
-	}
-
-	log.Printf("PrintfWithKey2, content:%s, args-len:%d\n", content, len(args))
-
-	logData := &logData{key: key, logTime: time.Now(), data: fmt.Sprintf(content, args...)}
 	l.logChan <- logData
 }
 

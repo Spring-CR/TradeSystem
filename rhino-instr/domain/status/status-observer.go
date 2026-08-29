@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/IBM/sarama"
+	"github.com/Shopify/sarama"
 )
 
 /*
@@ -58,7 +58,7 @@ func StatusObserve(c *trade_channel.KafkaTradeChannel) {
 		log.Println("Step 3")
 		// Step 3: 开启trasaction
 		tx, de := dbutil.BeginTx(context.DB)
-		if de != nil {
+		if de != nil  {
 			log.Println("cannot begin tx")
 			dbutil.RollbackTx(tx)
 			return false
@@ -71,7 +71,7 @@ func StatusObserve(c *trade_channel.KafkaTradeChannel) {
 			dbutil.RollbackTx(tx)
 			return false
 		}
-
+		
 		log.Println("Step 5")
 		// Step 5: 插入trade_instr_resps记录，唯一性检查保护
 		err = store.InsertTradeInstrResp(tx, tradeInstrResp)
@@ -84,6 +84,7 @@ func StatusObserve(c *trade_channel.KafkaTradeChannel) {
 		}
 
 		log.Printf("======> Success insert tradeInstrResp.SecondaryClOrdID:%s, tradeInstrResp.StatusKafkaOffset:%d\n", tradeInstrResp.SecondaryClOrdID, tradeInstrResp.StatusKafkaOffset)
+			
 
 		if logError(data, err) {
 			dbutil.RollbackTx(tx)
@@ -92,8 +93,8 @@ func StatusObserve(c *trade_channel.KafkaTradeChannel) {
 
 		log.Println("Step 6")
 		// Step 6: 更新关联的trade_instr记录（注意：不要把id也copyt了！）
-		tradeInstr, err := store.GetTradeInstrBySecondaryClOrdId(tx, tradeInstrResp.SecondaryClOrdID)
-		if logError(data, err) || tradeInstr == nil {
+		tradeInstr ,err := store.GetTradeInstrBySecondaryClOrdId(tx, tradeInstrResp.SecondaryClOrdID)
+		if logError(data, err) || tradeInstr==nil {
 			dbutil.RollbackTx(tx)
 			return false
 		}
@@ -104,9 +105,9 @@ func StatusObserve(c *trade_channel.KafkaTradeChannel) {
 			return false
 		}
 		tradeInstr.ID = updateId
-
+	
 		log.Printf("get tradeInstr to update, ID:%d\n, SecondaryClOrdID:%v, OrdStatus:%v, CumAmt:%v, CumQty:%v\n", tradeInstr.ID, tradeInstr.SecondaryClOrdID, tradeInstr.OrdStatus, tradeInstr.CumAmt, tradeInstr.CumQty)
-
+		
 		err = store.UpdateTradeInstrById(tx, tradeInstr)
 		if logError(data, err) {
 			dbutil.RollbackTx(tx)
@@ -114,7 +115,7 @@ func StatusObserve(c *trade_channel.KafkaTradeChannel) {
 		}
 
 		// Step 7: 更新状态
-		_, _, _, _, _, _, _, _, _, err = store.StatisTaskInstrStock(tx, date, int64(dailyInstrNo), int64(indexDailyModify), int64(stockSerialNo), true)
+		_, _, _, _, _, _, _, _, _, err = store.StatisTaskInstrStock (tx, date, int64(dailyInstrNo), int64(indexDailyModify), int64(stockSerialNo), true)
 		if logError(data, err) {
 			dbutil.RollbackTx(tx)
 			return false
@@ -122,7 +123,7 @@ func StatusObserve(c *trade_channel.KafkaTradeChannel) {
 
 		// Step 8: 提交事务
 		de = dbutil.CommitTx(tx)
-		if de != nil {
+		if de != nil  {
 			dbutil.RollbackTx(tx)
 			return false
 		}
@@ -132,7 +133,7 @@ func StatusObserve(c *trade_channel.KafkaTradeChannel) {
 	// 再开一个gorouting，检查超过2分钟没有返回的消息，是否有交易状态，是否超时
 }
 
-func parseSecondaryClOrdIDPattern(data []byte, secondaryClOrdID string) (date, dailyInstrNo, indexDailyModify, stockSerialNo, seriNo int, ok bool, err error) {
+func parseSecondaryClOrdIDPattern(data []byte, secondaryClOrdID string)(date, dailyInstrNo, indexDailyModify, stockSerialNo, seriNo int, ok bool, err error){
 
 	if !strings.HasPrefix(secondaryClOrdID, SecondaryClOrdIDPrefix) {
 		return
