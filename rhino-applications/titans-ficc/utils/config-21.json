@@ -1,0 +1,51 @@
+{
+    "ServerPort": 5093,
+    "DataQryServiceUrl": "http://10.51.136.21:6093/api/v1/data_qry?collection=CounterpartyPhoneNum&key=ALL_MAP_DATA",
+    "LoginServiceUrl": "http://tstgoats.gf.com.cn/api/ptrade/login",
+    "LoginClientID": "PTRADE_AGENT",
+    "LoginClientKey": "ptrade123",
+    "CapitalServiceUrl": "http://titans-tst.gf.com.cn/api/titans/margin/1.0.0/capitalAccountManage/accounts",
+    "QueryCycleSeconds": 600,
+    "PositionServiceUrl": "http://olts-dev.gf.com.cn/unitrade/test/titans/ficc/order_report/api/v1/report/position",
+    "CurrentTradeOrdersServiceUrl": "http://olts-dev.gf.com.cn/unitrade/test/titans/ficc/order_report/api/v1/report/current/trade_orders",
+    "HisTradeOrdersServiceUrl": "http://olts-dev.gf.com.cn/unitrade/test/titans/ficc/order_report/api/v1/report/history/trade_orders",
+    "PricingHubYtmConvUrl": "http://devudps.gf.com.cn/pricinghub/ficc/pricing/bond/ytm/conv",
+    "PricingHubAuth": "Basic dGl0YW5zX2Rldjp0aXRhbnMyMDI0",
+    "DataQryUrl": "http://10.51.136.21:6093/api/v1/data_qry",
+    "SyncLogsQryUrl": "http://10.51.136.21:6093/api/v1/synclogs",
+    "SyncLogsInterval": "2m",
+    "TimeZoneName": "Asia/Shanghai",
+    "AppId": "olts",
+    "AppSecret": "3db4a3f91e2057500abddf38f3e8725c",
+    "WebhookUrl": "http://qyapi-weixin-qq.testext.gf.com.cn/cgi-bin/webhook/send?key=3ab58980-8230-4c77-b88c-976d5a1e4eae",
+    "OrderCheckTasks": [
+        {
+            "Task": "over_sold",
+            "StartTime": "10:00:00",
+            "EndTime": "18:00:00",
+            "Interval": "15m"
+        },
+        {
+            "Task": "ctpty_data",
+            "StartTime": "08:00:00",
+            "EndTime": "20:00:00",
+            "Interval": "1h"
+        },
+        {
+            "Task": "capital_data",
+            "StartTime": "08:00:00",
+            "EndTime": "20:00:00",
+            "Interval": "15m"
+        },
+        {
+            "Task": "open_orders",
+            "Interval": "30s"
+        },
+        {
+            "Task": "symbols_t0",
+            "StartTime": "08:00:00",
+            "EndTime": "20:00:00",
+            "Interval": "15m"
+        }
+    ]
+}
