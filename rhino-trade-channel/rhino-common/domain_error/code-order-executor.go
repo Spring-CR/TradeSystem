@@ -1,0 +1,9 @@
+package domain_error
+
+const (
+	// 6xxxxxx - 订单执行器异常
+	ORDER_EXECUTOR_ERR_CODE                           = `600000`
+	ORDER_EXECUTOR_TRADE_CHANNEL_NOT_FOUND_ERR_CODE   = `600001`
+	CANNOT_FIND_ORDER_BY_APP_ORD_ID_ERR_CODE          = `600002`
+	ORDER_WITH_STATUS_WHICH_CANNOT_BE_CANCEL_ERR_CODE = `600003`
+)
